@@ -18,11 +18,11 @@ SORTING_METHODS = {
 }
 
 [:by_decreasing_order_of_distance, :by_decreasing_order_of_ratio].each do |sort_method|
-  pairs = File.readlines("jobs.txt").drop(1).map { |x| x.gsub(/\n/, "").split(" ").map(&:to_i) }.sort(& SORTING_METHODS[sort_method])
+  pairs = File.readlines("small_jobs.txt").drop(1).map { |x| x.gsub(/\n/, "").split(" ").map(&:to_i) }.sort(& SORTING_METHODS[sort_method])
 
-  total = pairs.inject({:total => 0, :time_so_far => 0}) do |acc, value| 
-    new_total = acc[:total] + ((acc[:time_so_far] + value[1]) * value[0])
-    new_time_so_far = acc[:time_so_far] + value[1]
+  total = pairs.inject({:total => 0, :time_so_far => 0}) do |acc, (weight, length)| 
+    new_total = acc[:total] + ((acc[:time_so_far] + length) * weight)
+    new_time_so_far = acc[:time_so_far] + length
     {:total => new_total, :time_so_far => new_time_so_far }
   end
 
