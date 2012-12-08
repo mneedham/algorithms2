@@ -1,3 +1,5 @@
+# Greedy algorithm for minimising the weighted sum of completion times
+
 SORTING_METHODS = {
   :by_decreasing_order_of_distance => ->(one,two) {
     one_difference = (one[:weight] - one[:length])
