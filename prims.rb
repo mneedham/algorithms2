@@ -1,7 +1,24 @@
 # Prim's Minimum Spanning Tree Algorithm - Naive version
 
-def create_adjacency_matrix(size)
-  [].tap { |m| size.times { m << Array.new(size) } }
+def file 
+  @file ||= File.readlines("edges.txt")
+end
+
+def header 
+  @header ||= file.take(1)[0]
+end
+
+def number_of_nodes
+  @number_of_nodes ||= header.split(" ")[0].to_i
+end
+
+def create_adjacency_matrix
+  adjacency_matrix = [].tap { |m| number_of_nodes.times { m << Array.new(number_of_nodes) } }
+  file.drop(1).map { |x| x.gsub(/\n/, "").split(" ").map(&:to_i) }.each do |(node1, node2, weight)|
+    adjacency_matrix[node1 - 1][node2 - 1] = weight
+    adjacency_matrix[node2 - 1][node1 - 1] = weight
+  end
+  adjacency_matrix
 end
 
 def find_cheapest_edge(adjacency_matrix, nodes_spanned_so_far, number_of_nodes)
@@ -32,22 +49,14 @@ def select_first_edge(adjacency_matrix)
 end
 
 def nodes_left_to_cover
-  (1..@number_of_nodes).to_a - @nodes_spanned_so_far
+  (1..number_of_nodes).to_a - @nodes_spanned_so_far
 end
 
-file = File.readlines("small_edges.txt")
-header = file.take(1)[0]
-@number_of_nodes = header.split(" ")[0].to_i
-adjacency_matrix = create_adjacency_matrix(@number_of_nodes)
-file.drop(1).map { |x| x.gsub(/\n/, "").split(" ").map(&:to_i) }.each do |(node1, node2, weight)|
-  adjacency_matrix[node1 - 1][node2 - 1] = weight
-  adjacency_matrix[node2 - 1][node1 - 1] = weight
-end
-
+adjacency_matrix = create_adjacency_matrix
 @nodes_spanned_so_far, @edges = select_first_edge(adjacency_matrix)
 
 while !nodes_left_to_cover.empty?
-  cheapest_edge = find_cheapest_edge(adjacency_matrix, @nodes_spanned_so_far, @number_of_nodes)
+  cheapest_edge = find_cheapest_edge(adjacency_matrix, @nodes_spanned_so_far, number_of_nodes)
   @edges << cheapest_edge
   @nodes_spanned_so_far << cheapest_edge[:start]  
 end
