@@ -20,7 +20,7 @@ SORTING_METHODS = {
 }
 
 [:by_decreasing_order_of_distance, :by_decreasing_order_of_ratio].each do |sort_method|
-  pairs = File.readlines("small_jobs.txt").drop(1).map do  |x| 
+  pairs = File.readlines("jobs.txt").drop(1).map do  |x| 
     (weight, length) = x.gsub(/\n/, "").split(" ").map(&:to_i)
     { :weight => weight, :length => length }
   end.sort(& SORTING_METHODS[sort_method])
