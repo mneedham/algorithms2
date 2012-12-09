@@ -10,7 +10,7 @@ def find_cheapest_edge(adjacency_matrix, vertices_spanned_so_far, number_of_node
   available_vertices = (0..number_of_nodes-1).to_a.reject { |x| vertices_spanned_so_far.include?(x + 1) }  
   
   cheapest_edges = available_vertices.inject([]) do |acc, vertice|
-    adjacency_matrix[vertice].each_with_index.reject { |edge, index| edge.nil? }.select { |edge, index| vertices_spanned_so_far.include?(index + 1) }.each do |edge, index|
+    adjacency_matrix[vertice].each_with_index.reject { |edge, _| edge.nil? }.select { |edge, index| vertices_spanned_so_far.include?(index + 1) }.each do |edge, index|
       acc << { :start => vertice + 1, :end => index + 1, :weight => edge }
     end
     acc
@@ -28,21 +28,21 @@ def select_first_edge(adjacency_matrix)
   [[1, cheapest_edge[:end]], [cheapest_edge]]
 end
 
-file = File.readlines("edges.txt")
+file = File.readlines("small_edges.txt")
 
-header = file.take(1)
-number_of_nodes = header[0].split(" ")[0].to_i
-m = create_adjacency_matrix(number_of_nodes)
+header = file.take(1)[0]
+number_of_nodes = header.split(" ")[0].to_i
+adjacency_matrix = create_adjacency_matrix(number_of_nodes)
 
 file.drop(1).map { |x| x.gsub(/\n/, "").split(" ").map(&:to_i) }.each do |(node1, node2, weight)|
-  m[node1 - 1][node2 - 1] = weight
-  m[node2 - 1][node1 - 1] = weight
+  adjacency_matrix[node1 - 1][node2 - 1] = weight
+  adjacency_matrix[node2 - 1][node1 - 1] = weight
 end
 
-vertices_spanned_so_far, edges = select_first_edge(m)
+vertices_spanned_so_far, edges = select_first_edge(adjacency_matrix)
 
 while !((1..number_of_nodes).to_a - vertices_spanned_so_far).empty?
-  cheapest_edge = find_cheapest_edge(m, vertices_spanned_so_far, number_of_nodes)
+  cheapest_edge = find_cheapest_edge(adjacency_matrix, vertices_spanned_so_far, number_of_nodes)
   edges << cheapest_edge
   vertices_spanned_so_far << cheapest_edge[:start]  
 end
