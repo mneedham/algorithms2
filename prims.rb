@@ -44,16 +44,19 @@ def select_first_edge(adjacency_matrix)
     all_edges << { :start => starting_node, :end => index + 1, :weight => edge }
     all_edges
   end
-  cheapest_edge = cheapest_edges.sort { |x,y| x[:weight] <=> y[:weight] }.first
-  [[starting_node, cheapest_edge[:end]], [cheapest_edge]]
+  cheapest_edges.sort { |x,y| x[:weight] <=> y[:weight] }.first
 end
 
 def nodes_left_to_cover
   (1..number_of_nodes).to_a - @nodes_spanned_so_far
 end
 
+# We start about here
+
 adjacency_matrix = create_adjacency_matrix
-@nodes_spanned_so_far, @edges = select_first_edge(adjacency_matrix)
+
+first_edge = select_first_edge(adjacency_matrix)
+@nodes_spanned_so_far, @edges = [first_edge[:start], first_edge[:end]], [first_edge]
 
 while !nodes_left_to_cover.empty?
   cheapest_edge = find_cheapest_edge(adjacency_matrix, @nodes_spanned_so_far, number_of_nodes)
