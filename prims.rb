@@ -25,8 +25,8 @@ def find_cheapest_edge(adjacency_matrix, nodes_spanned_so_far, number_of_nodes)
   available_nodes = (0..number_of_nodes-1).to_a.reject { |node_index| nodes_spanned_so_far.include?(node_index + 1) }  
   
   cheapest_edges = available_nodes.inject([]) do |acc, node_index|
-    get_edges(adjacency_matrix, node_index).select { |edge, other_node_index| nodes_spanned_so_far.include?(other_node_index + 1) }.each do |edge, other_node_index|
-      acc << { :start => node_index + 1, :end => other_node_index + 1, :weight => edge }
+    get_edges(adjacency_matrix, node_index).select { |_, other_node_index| nodes_spanned_so_far.include?(other_node_index + 1) }.each do |weight, other_node_index|
+      acc << { :start => node_index + 1, :end => other_node_index + 1, :weight => weight }
     end
     acc
   end
@@ -51,10 +51,9 @@ def nodes_left_to_cover
   (1..number_of_nodes).to_a - @nodes_spanned_so_far
 end
 
-# We start about here
+# Prim's algorithm
 
 adjacency_matrix = create_adjacency_matrix
-
 first_edge = select_first_edge(adjacency_matrix)
 @nodes_spanned_so_far, @edges = [first_edge[:start], first_edge[:end]], [first_edge]
 
