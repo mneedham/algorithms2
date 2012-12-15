@@ -24,30 +24,8 @@ def create_adjacency_matrix
   adjacency_matrix
 end
 
-def find_cheapest_edge(adjacency_matrix, nodes_spanned_so_far, number_of_nodes)
-  available_nodes = (0..number_of_nodes-1).to_a.reject { |node_index| nodes_spanned_so_far.include?(node_index + 1) }  
-  
-  cheapest_edges = available_nodes.inject([]) do |acc, node_index|
-    get_edges(adjacency_matrix, node_index).select { |_, other_node_index| nodes_spanned_so_far.include?(other_node_index + 1) }.each do |weight, other_node_index|
-      acc << { :start => node_index + 1, :end => other_node_index + 1, :weight => weight }
-    end
-    acc
-  end
-    
-  cheapest_edges.sort { |x,y| x[:weight] <=> y[:weight] }.first
-end
-
 def get_edges(adjacency_matrix, node_index)
   adjacency_matrix[node_index].each_with_index.reject { |edge, index| edge.nil? }
-end
-
-def select_first_edge(adjacency_matrix)
-  starting_node = 1
-  cheapest_edges = get_edges(adjacency_matrix, 0).inject([]) do |all_edges, (edge, index)|
-    all_edges << { :start => starting_node, :end => index + 1, :weight => edge }
-    all_edges
-  end
-  cheapest_edges.sort { |x,y| x[:weight] <=> y[:weight] }.first
 end
 
 def nodes_left_to_cover
