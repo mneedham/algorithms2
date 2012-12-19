@@ -40,7 +40,8 @@ adjacency_matrix = create_adjacency_matrix
 
 heap = PriorityQueue.new
 nodes_left_to_cover.each do |node|
-  cheapest_nodes = get_edges(adjacency_matrix, node-1).select { |_, other_node_index| @nodes_spanned_so_far.include?(other_node_index + 1) } || []
+  cheapest_nodes = get_edges(adjacency_matrix, node-1).
+                   select { |_, other_node_index| @nodes_spanned_so_far.include?(other_node_index + 1) } || []
   
   cheapest = cheapest_nodes.inject([]) do |all_edges, (weight, index)|
     all_edges << { :start => node, :end => index + 1, :weight => weight }
@@ -52,13 +53,13 @@ nodes_left_to_cover.each do |node|
 end
 
 while !nodes_left_to_cover.empty?
-  cheapest = heap.delete_min
-  spanning_tree_cost += cheapest[1]
-  @nodes_spanned_so_far << cheapest[0]
+  cheapest_node, weight = heap.delete_min
+  spanning_tree_cost += weight
+  @nodes_spanned_so_far << cheapest_node
   
-  edges_with_potential_change = get_edges(adjacency_matrix, cheapest[0]-1).reject { |_, node_index| @nodes_spanned_so_far.include?(node_index + 1) }
+  edges_with_potential_change = get_edges(adjacency_matrix, cheapest_node-1).reject { |_, node_index| @nodes_spanned_so_far.include?(node_index + 1) }
   edges_with_potential_change.each do |weight, node_index|
-    heap.change_priority(node_index+1, [heap.priority(node_index+1), adjacency_matrix[cheapest[0]-1][node_index]].min)
+    heap.change_priority(node_index+1, [heap.priority(node_index+1), adjacency_matrix[cheapest_node-1][node_index]].min)
   end
 end
 
