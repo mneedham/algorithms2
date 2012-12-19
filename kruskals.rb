@@ -11,20 +11,14 @@ def has_cycles(edge)
 end
 
 def cycle_between(one, two, edges)
-  adjacent_edges = find_adjacent_edges(one, edges)
-  return false if adjacent_edges.size == 0
-  adjacent_edges.each do |edge|
-    if !edge[:explored]
-      edge[:explored] = true
-      other_node = (edge[:from] == one) ? edge[:to] : edge[:from]
-      return true if other_node == two || cycle_between(other_node, two, edges)
-    end
+  adjacent_edges = edges.select { |edge| edge[:to] == one || edge[:from] == one}  
+  return false if adjacent_edges.empty?
+  adjacent_edges.reject {|edge| edge[:explored] }.each do |edge|
+    edge[:explored] = true
+    other_node = (edge[:from] == one) ? edge[:to] : edge[:from]
+    return true if other_node == two || cycle_between(other_node, two, edges)
   end
   false
-end
-
-def find_adjacent_edges(one, edges)
-  edges.select { |edge| edge[:to] == one || edge[:from] == one}  
 end
 
 @minimum_spanning_tree = []
