@@ -11,6 +11,7 @@ def file
   @file ||= File.readlines("edges.txt")
 end
 
+# Some renaming of variables of Michael Luckender's class -> https://github.com/mluckeneder/Union-Find-Ruby/blob/master/quick-union.rb
 class UnionSet
   def initialize(n)
     @leaders = []
