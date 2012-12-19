@@ -14,8 +14,7 @@ end
 # Some renaming of variables of Michael Luckender's class -> https://github.com/mluckeneder/Union-Find-Ruby/blob/master/quick-union.rb
 class UnionSet
   def initialize(n)
-    @leaders = []
-    1.upto(n) {|i| @leaders[i] = i}
+    @leaders = 1.upto(n).inject([]) { |leaders, i| leaders[i] = i; leaders }
   end
   
   def connected?(id1,id2)
