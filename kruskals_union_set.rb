@@ -15,7 +15,7 @@ end
 class UnionSet
   def initialize(n)
     @leaders = []
-    0.upto(n-1) {|i| @leaders[i] = i}
+    1.upto(n) {|i| @leaders[i] = i}
   end
   
   def connected?(id1,id2)
@@ -37,9 +37,9 @@ edges = file.drop(1).map { |x| x.gsub(/\n/, "").split(" ").map(&:to_i) }.
                      sort_by { |x| x[:weight]}
                      
 edges.each do |edge|
-  if !set.connected?(edge[:from] -1, edge[:to] -1)
+  if !set.connected?(edge[:from], edge[:to])
     @minimum_spanning_tree << edge 
-    set.union(edge[:from]-1, edge[:to] -1)
+    set.union(edge[:from], edge[:to])
   end  
 end
 
