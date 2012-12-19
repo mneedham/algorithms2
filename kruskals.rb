@@ -17,9 +17,7 @@ def cycle_between(one, two, edges)
     if !edge[:explored]
       edge[:explored] = true
       other_node = (edge[:from] == one) ? edge[:to] : edge[:from]
-      return true if other_node == two
-      found_cycle = cycle_between(other_node, two, edges)
-      return true if found_cycle
+      return true if other_node == two || cycle_between(other_node, two, edges)
     end
   end
   false
