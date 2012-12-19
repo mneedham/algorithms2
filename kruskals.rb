@@ -36,9 +36,7 @@ edges = file.drop(1).map { |x| x.gsub(/\n/, "").split(" ").map(&:to_i) }.
                      sort_by { |x| x[:weight]}
                      
 edges.each do |edge|
-  if !has_cycles(edge)
-    @minimum_spanning_tree << edge
-  end
+  @minimum_spanning_tree << edge unless has_cycles edge
 end
 
 puts "MST: #{@minimum_spanning_tree}"
