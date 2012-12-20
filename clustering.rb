@@ -25,7 +25,7 @@ class UnionFind
 end
 
 def file 
-  @file ||= File.readlines("clustering1.txt")
+  @file ||= File.readlines("clustering_medium.txt")
 end
 
 def number_of_nodes
@@ -47,8 +47,7 @@ edges.each do |edge|
   if set.number_of_clusters > 4
     set.union(edge[:from]-1, edge[:to]-1)
   else
-    spacing = edge[:weight]
-    break
+    (spacing = edge[:weight]) && break unless set.connected?(edge[:from]-1, edge[:to]-1)
   end
 end
 
