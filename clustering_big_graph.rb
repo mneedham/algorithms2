@@ -11,6 +11,7 @@ class UnionFind
   end
   
   def union(id1,id2)
+    return if id1 == id2
     leader_1, leader_2 = @leaders[id1], @leaders[id2]
     @leaders.map! {|i| (i == leader_1) ? leader_2 : i }
   end
@@ -73,14 +74,10 @@ nodes.each_with_index do |node, index|
   @magical_hash[node] << index
 end
 
-nodes.each_with_index do |node, index|
-  my_friends = close_friends(node)
-  friends = my_friends.inject([]) do |node_indexes, friend|
-    (@magical_hash[friend] || []).each { |friend_index| node_indexes << friend_index }
-    node_indexes
+nodes.each_with_index do |node, index|  
+  close_friends(node).each do |friend|
+    (@magical_hash[friend] || []).each { |friend_index| set.union(index, friend_index) }
   end
-    
-  friends.each { |friend_index| set.union(index, friend_index)  } if friends.size > 1
 end
 
 puts "size: #{set.number_of_clusters}"
