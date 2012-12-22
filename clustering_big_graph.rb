@@ -58,33 +58,29 @@ def change_by_one_bit(me)
   me.each_with_index do |x, index|
     new_me = me.dup
     new_me[index] = x == 0 ? 1 : 0
-    differ_by_one << new_me
+    differ_by_one << new_me if @magical_hash[new_me]
   end
   differ_by_one
-end
-
-def hamming_distance(a, b)
-  a.zip(b).select { |x, y| x != y }.size
 end
 
 set = UnionFind.new number_of_nodes
 
 nodes = file.drop(1).map { |x| x.gsub(/\n/, "").split(" ").map(&:to_i) }
 
-magical_hash = {}
-
+@magical_hash = {}
 nodes.each_with_index do |node, index|
-  magical_hash[node] ||= []
-  magical_hash[node] << index
+  @magical_hash[node] ||= []
+  @magical_hash[node] << index
 end
 
 nodes.each_with_index do |node, index|
-  friends = close_friends(node).inject([]) do |node_indexes, friend|
-    (magical_hash[friend] || []).each { |friend_index| node_indexes << friend_index }
+  my_friends = close_friends(node)
+  friends = my_friends.inject([]) do |node_indexes, friend|
+    (@magical_hash[friend] || []).each { |friend_index| node_indexes << friend_index }
     node_indexes
   end
     
-  friends.each { |friend_index| set.union(index, friend_index)  }
+  friends.each { |friend_index| set.union(index, friend_index)  } if friends.size > 1
 end
 
 puts "size: #{set.number_of_clusters}"
