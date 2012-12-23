@@ -41,9 +41,11 @@ def bits
   @bits ||= header.split(" ")[1].to_i
 end
 
-def close_friends(as_base_10, bits)
+def close_friends(me, bits)
   offsets = (0..(bits - 1)).map { |x| 2 ** x }
-  (offsets.map { |off| as_base_10 ^ off } + offsets.combination(2).to_a.map { |a,b| as_base_10 ^ (a|b) }) + [as_base_10]
+  friends_differing_by_one = offsets.map { |off| me ^ off }
+  friends_differing_by_two = offsets.combination(2).to_a.map { |a,b| me ^ (a|b) }
+  friends_differing_by_one + friends_differing_by_two + [me]
 end
 
 set = UnionFind.new number_of_nodes
