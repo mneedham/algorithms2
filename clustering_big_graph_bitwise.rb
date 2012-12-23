@@ -38,7 +38,7 @@ def header
 end
 
 def bits 
-  24
+  @bits ||= header.split(" ")[1].to_i
 end
 
 def close_friends(as_base_10, bits)
