@@ -41,8 +41,7 @@ def bits
   @bits ||= header.split(" ")[1].to_i
 end
 
-def close_friends(me, bits)
-  offsets = (0..(bits - 1)).map { |x| 2 ** x }
+def close_friends(me, offsets)  
   friends_differing_by_one = offsets.map { |off| me ^ off }
   friends_differing_by_two = offsets.combination(2).to_a.map { |a,b| me ^ (a|b) }
   friends_differing_by_one + friends_differing_by_two + [me]
@@ -58,8 +57,9 @@ nodes.each_with_index do |node, index|
   @magical_hash[node] << index
 end
 
+offsets = (0..(bits - 1)).map { |x| 2 ** x }
 nodes.each_with_index do |node, index|  
-  close_friends(node, bits).each do |friend|
+  close_friends(node, offsets).each do |friend|
     (@magical_hash[friend] || []).each { |friend_index| set.union(index, friend_index) }
   end
 end
