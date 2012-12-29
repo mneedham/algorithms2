@@ -38,10 +38,9 @@ process fileContents = (bits, nodes)
           nodes = Prelude.map (toDecimal . trimSpaces) . (drop 1) $ processedFileContents
           processedFileContents = splitOn "\n" fileContents
 
--- maxCluster :: Int -> [Int] -> Equivalence Int -> Map Int [Int] -> Int
+maxCluster :: Int -> [Int] -> Equivalence Int -> Map Int [Int] -> Int
 maxCluster bits nodes unionFind nodesMap = 
-    numberOfComponents $ Data.List.foldl (\uf (x,y) -> equate x y uf) unionFind (nodesToMerge nodes nodesMap neighbourOffsets)
-    where neighbourOffsets = offsets bits
+    numberOfComponents $ Data.List.foldl (\uf (x,y) -> equate x y uf) unionFind (nodesToMerge nodes nodesMap (offsets bits))
 
 -- neighbours for one node
 nodesToMerge nodes nodesMap neighboursOffsets = 
@@ -67,7 +66,7 @@ asMapEntry nodesWithIndexes = ((snd . head) nodesWithIndexes, Prelude.foldl (\ac
 -- findMaxClusters :: String -> Int
 findMaxClusters fileContents = 
     -- size nodesMap
-    -- foo bits nodes nodesMap
+    -- nodesToMerge nodes nodesMap (offsets bits)
     maxCluster bits nodes unionFind nodesMap
     where (bits,nodes) = process fileContents
           unionFind = Data.Map.fold (\value acc -> Prelude.foldl (\uf pair -> equate (pair !! 0) (pair !! 1) uf) acc (combinationsOf 2 value)) 
