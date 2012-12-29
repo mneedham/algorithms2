@@ -9,7 +9,7 @@ import Data.Map
 import Data.List
 import Data.Maybe
     
-file = "clustering2_another.txt"
+file = "clustering2.txt"
 
 -- subsets of size k
 combinationsOf 0 _ = [[]]
@@ -40,16 +40,15 @@ process fileContents = (bits, nodes)
 
 -- maxCluster :: Int -> [Int] -> Equivalence Int -> Map Int [Int] -> Int
 maxCluster bits nodes unionFind nodesMap = 
-    numberOfComponents $ Data.List.foldl (\uf (x,y) -> equate x y uf) unionFind (foo bits nodes nodesMap)
+    numberOfComponents $ Data.List.foldl (\uf (x,y) -> equate x y uf) unionFind (foo neighbourOffsets nodes nodesMap)
+    where neighbourOffsets = offsets bits
 
 -- neighbours for one node
-foo bits nodes nodesMap = 
-    join $ Prelude.map (\(nodeIndex, node) -> Prelude.foldl (\acc node -> acc ++ [(nodeIndex, node)]) [] $ findNeighbours node) (zip [0..] nodes)
-    where findNeighbours node = findNeighbouringNodes nodesMap (neighbours node neighbourOffsets)  
-          neighbourOffsets = offsets bits
+foo neighboursOffsets nodes nodesMap = 
+    join $ Prelude.map (\(nodeIndex, node) -> Prelude.foldl (\acc node -> acc ++ [(nodeIndex, node)]) [] $ getNeighbours node) (zip [0..] nodes)
+    where getNeighbours node = findNeighbouringNodes nodesMap (neighbours node neighboursOffsets)  
 
 -- Prelude.foldl (\acc node -> acc ++ [(0, node)]) [] $ findNeighbouringNodes theMap (neighbours 14734287 (offsets 23))
-
 
 findNeighbouringNodes :: Map Int [Int] -> [Int] -> [Int]
 findNeighbouringNodes nodesMap = 
