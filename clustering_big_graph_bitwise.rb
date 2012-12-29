@@ -44,7 +44,7 @@ end
 def close_friends(me, offsets)  
   friends_differing_by_one = offsets.map { |off| me ^ off }
   friends_differing_by_two = offsets.combination(2).to_a.map { |a,b| me ^ (a|b) }
-  friends_differing_by_one + friends_differing_by_two + [me]
+  friends_differing_by_one + friends_differing_by_two
 end
 
 set = UnionFind.new number_of_nodes
@@ -57,11 +57,23 @@ nodes.each_with_index do |node, index|
   @magical_hash[node] << index
 end
 
-offsets = (0..(bits - 1)).map { |x| 2 ** x }
-nodes.each_with_index do |node, index|  
-  close_friends(node, offsets).each do |friend|
-    (@magical_hash[friend] || []).each { |friend_index| set.union(index, friend_index) }
+@magical_hash.each_pair do |key, value|
+  if value.size > 1
+    value.combination(2).to_a.each { |x, y| set.union(x, y)  }
   end
 end
 
-puts "size: #{set.number_of_clusters}"
+
+combinations = []
+
+offsets = (0..(bits - 1)).map { |x| 2 ** x }
+nodes.each_with_index do |node, index|  
+  close_friends(node, offsets).each do |friend|
+    (@magical_hash[friend] || []).each { |friend_index| combinations << [index, friend_index]; set.union(index, friend_index) }
+  end
+end
+
+# p combinations
+# puts "size #{combinations.size}"
+# puts "size: #{set.number_of_clusters}"
+p set.cluster_leaders

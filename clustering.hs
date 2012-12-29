@@ -9,7 +9,7 @@ import Data.Map
 import Data.List
 import Data.Maybe
     
-file = "clustering2_medium.txt"
+file = "clustering2_another.txt"
 
 -- subsets of size k
 combinationsOf 0 _ = [[]]
@@ -30,8 +30,7 @@ offsets bits = Prelude.map (shiftL 1) [0..(bits - 1)]
 
 neighbours :: Int -> [Int] -> [Int]
 neighbours me offsets = Prelude.map (xor me) offsets ++ 
-                        Prelude.map (\pair -> xor me ((pair !! 0) .|. (pair !! 1))) (combinationsOf 2 offsets) ++
-                        [me]
+                        Prelude.map (\pair -> xor me ((pair !! 0) .|. (pair !! 1))) (combinationsOf 2 offsets)
 
 process :: String -> (Int, [Int])
 process fileContents = (bits, nodes)
@@ -39,16 +38,15 @@ process fileContents = (bits, nodes)
           nodes = Prelude.map (toDecimal . trimSpaces) . (drop 1) $ processedFileContents
           processedFileContents = splitOn "\n" fileContents
 
-maxCluster :: Int -> [Int] -> Equivalence Int -> Map Int [Int] -> Int
+-- maxCluster :: Int -> [Int] -> Equivalence Int -> Map Int [Int] -> Int
 maxCluster bits nodes unionFind nodesMap = 
-    numberOfComponents $ Data.List.foldl (\uf (x,y) -> equate x y uf) unionFind (foo nodes nodesMap)
-
--- numberOfComponents $ Data.List.foldl (\uf x -> equate 1 x uf) unionFind nodes
+    numberOfComponents $ Data.List.foldl (\uf (x,y) -> equate x y uf) unionFind (foo bits nodes nodesMap)
 
 -- neighbours for one node
-foo nodes nodesMap = 
+foo bits nodes nodesMap = 
     join $ Prelude.map (\(nodeIndex, node) -> Prelude.foldl (\acc node -> acc ++ [(nodeIndex, node)]) [] $ findNeighbours node) (zip [0..] nodes)
-    where findNeighbours node = findNeighbouringNodes nodesMap (neighbours node (offsets (length nodes - 1)))  
+    where findNeighbours node = findNeighbouringNodes nodesMap (neighbours node neighbourOffsets)  
+          neighbourOffsets = offsets bits
 
 -- Prelude.foldl (\acc node -> acc ++ [(0, node)]) [] $ findNeighbouringNodes theMap (neighbours 14734287 (offsets 23))
 
@@ -69,15 +67,18 @@ asMapEntry nodesWithIndexes = ((snd . head) nodesWithIndexes, Prelude.foldl (\ac
           
 -- findMaxClusters :: String -> Int
 findMaxClusters fileContents = 
-    -- foo nodes nodesMap
+    -- size nodesMap
+    -- foo bits nodes nodesMap
     maxCluster bits nodes unionFind nodesMap
     where (bits,nodes) = process fileContents
-          unionFind = emptyEquivalence (0, length nodes-1)
+          unionFind = Data.Map.fold (\value acc -> Prelude.foldl (\uf pair -> equate (pair !! 0) (pair !! 1) uf) acc (combinationsOf 2 value)) 
+                                    (emptyEquivalence (0, length nodes-1)) 
+                                    (toMap nodes)
           nodesMap = toMap nodes
 
 main = do     
     withFile file ReadMode (\handle -> do  
         contents <- hGetContents handle     
-        (putStr . show . findMaxClusters) contents)
+        (putStrLn . show . findMaxClusters) contents)
         
 -- rel = equateAll [1,3,5,7,9] . equate 5 6 . equate 2 4 $ emptyEquivalence (1,10)
