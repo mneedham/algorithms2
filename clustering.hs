@@ -40,12 +40,12 @@ process fileContents = (bits, nodes)
 
 -- maxCluster :: Int -> [Int] -> Equivalence Int -> Map Int [Int] -> Int
 maxCluster bits nodes unionFind nodesMap = 
-    numberOfComponents $ Data.List.foldl (\uf (x,y) -> equate x y uf) unionFind (foo neighbourOffsets nodes nodesMap)
+    numberOfComponents $ Data.List.foldl (\uf (x,y) -> equate x y uf) unionFind (nodesToMerge nodes nodesMap neighbourOffsets)
     where neighbourOffsets = offsets bits
 
 -- neighbours for one node
-foo neighboursOffsets nodes nodesMap = 
-    join $ Prelude.map (\(nodeIndex, node) -> Prelude.foldl (\acc node -> acc ++ [(nodeIndex, node)]) [] $ getNeighbours node) (zip [0..] nodes)
+nodesToMerge nodes nodesMap neighboursOffsets = 
+    Prelude.concatMap (\(nodeIndex, node) -> zip (repeat nodeIndex) (getNeighbours node)) (zip [0..] nodes)
     where getNeighbours node = findNeighbouringNodes nodesMap (neighbours node neighboursOffsets)  
 
 -- Prelude.foldl (\acc node -> acc ++ [(0, node)]) [] $ findNeighbouringNodes theMap (neighbours 14734287 (offsets 23))
