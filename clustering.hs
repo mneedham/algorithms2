@@ -39,15 +39,15 @@ maxCluster :: Int -> [Int] -> Equivalence Int -> Map Int Int -> Int
 maxCluster bits nodes unionFind nodesMap = 
     numberOfComponents $ Data.List.foldl (\uf (x,y) -> equate x y uf) unionFind (nodesToMerge nodes nodesMap (offsets bits))
 
+nodesToMerge :: [Int] -> Map Int Int -> [Int] -> [(Int, Int)]
 nodesToMerge nodes nodesMap offsets = 
-    Prelude.concatMap (\(nodeIndex, node) -> zip (repeat nodeIndex) (getNeighbours node)) (zip [0..] nodes)
-    where getNeighbours node = (Prelude.map fromJust . Prelude.filter isJust . Prelude.map findInNodesMap) $ neighbours node offsets
+    Prelude.concatMap nodeCombinations (zip [0..] nodes)    
+    where nodeCombinations (nodeIndex, node) = zip (repeat nodeIndex) (getNeighbours node)
+          getNeighbours node = join . Prelude.map (maybeToList . findInNodesMap) $ neighbours node
           findInNodesMap neighbour = Data.Map.lookup neighbour nodesMap
+          neighbours node = Prelude.map (xor node) offsets ++ 
+                            Prelude.map (\pair -> xor node ((pair !! 0) .|. (pair !! 1))) (combinationsOf 2 offsets)
 
-neighbours :: Int -> [Int] -> [Int]
-neighbours me offsets = Prelude.map (xor me) offsets ++ 
-                        Prelude.map (\pair -> xor me ((pair !! 0) .|. (pair !! 1))) (combinationsOf 2 offsets)
-                    
 -- findMaxClusters :: String -> Int
 findMaxClusters fileContents = 
     -- size nodesMap
@@ -60,6 +60,4 @@ findMaxClusters fileContents =
 main = do     
     withFile file ReadMode (\handle -> do  
         contents <- hGetContents handle     
-        (putStrLn . show . findMaxClusters) contents)
-        
--- rel = equateAll [1,3,5,7,9] . equate 5 6 . equate 2 4 $ emptyEquivalence (1,10)
+        (putStrLn . show . findMaxClusters) contents)    
