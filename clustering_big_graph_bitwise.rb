@@ -72,7 +72,7 @@ combinations.each do |index, friend_index|
   set.union(index, friend_index)
 end
 
-p combinations
-puts "size #{combinations.size}"
+# p combinations
+# puts "size #{combinations.size}"
 puts "size: #{set.number_of_clusters}"
 # p set.cluster_leaders
