@@ -39,16 +39,10 @@ maxCluster :: Int -> [Int] -> Equivalence Int -> Map Int Int -> Int
 maxCluster bits nodes unionFind nodesMap = 
     numberOfComponents $ Data.List.foldl (\uf (x,y) -> equate x y uf) unionFind (nodesToMerge nodes nodesMap (offsets bits))
 
-nodesToMerge nodes nodesMap neighboursOffsets = 
+nodesToMerge nodes nodesMap offsets = 
     Prelude.concatMap (\(nodeIndex, node) -> zip (repeat nodeIndex) (getNeighbours node)) (zip [0..] nodes)
-    where getNeighbours node = findNeighbouringNodes nodesMap node neighboursOffsets  
-
-findNeighbouringNodes :: Map Int Int -> Int -> [Int] -> [Int]
-findNeighbouringNodes nodesMap node offsets = 
-    (Prelude.map fromJust . Prelude.filter isJust . Prelude.map (findIn nodesMap)) (neighbours node offsets)
-
-findIn :: Map Int Int -> Int -> Maybe Int
-findIn nodesMap neighbour = Data.Map.lookup neighbour nodesMap
+    where getNeighbours node = (Prelude.map fromJust . Prelude.filter isJust . Prelude.map findInNodesMap) $ neighbours node offsets
+          findInNodesMap neighbour = Data.Map.lookup neighbour nodesMap
 
 neighbours :: Int -> [Int] -> [Int]
 neighbours me offsets = Prelude.map (xor me) offsets ++ 
