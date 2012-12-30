@@ -29,37 +29,33 @@ trimSpaces = Prelude.filter (not . isSpace)
 offsets :: Int -> [Int]
 offsets bits = Prelude.map (shiftL 1) [0..(bits - 1)]
 
-neighbours :: Int -> [Int] -> [Int]
-neighbours me offsets = Prelude.map (xor me) offsets ++ 
-                        Prelude.map (\pair -> xor me ((pair !! 0) .|. (pair !! 1))) (combinationsOf 2 offsets)
-
 process :: String -> (Int, [Int])
 process fileContents = (bits, nodes)
     where bits = extractBits $ processedFileContents !! 0
           nodes = (Data.Set.toList . Data.Set.fromList) $ Prelude.map (toDecimal . trimSpaces) . (drop 1) $ processedFileContents
           processedFileContents = splitOn "\n" fileContents
 
-maxCluster :: Int -> [Int] -> Equivalence Int -> Map Int [Int] -> Int
+maxCluster :: Int -> [Int] -> Equivalence Int -> Map Int Int -> Int
 maxCluster bits nodes unionFind nodesMap = 
     numberOfComponents $ Data.List.foldl (\uf (x,y) -> equate x y uf) unionFind (nodesToMerge nodes nodesMap (offsets bits))
 
--- neighbours for one node
 nodesToMerge nodes nodesMap neighboursOffsets = 
     Prelude.concatMap (\(nodeIndex, node) -> zip (repeat nodeIndex) (getNeighbours node)) (zip [0..] nodes)
-    where getNeighbours node = findNeighbouringNodes nodesMap (neighbours node neighboursOffsets)  
+    where getNeighbours node = findNeighbouringNodes nodesMap node neighboursOffsets  
 
--- Prelude.foldl (\acc node -> acc ++ [(0, node)]) [] $ findNeighbouringNodes theMap (neighbours 14734287 (offsets 23))
+findNeighbouringNodes :: Map Int Int -> Int -> [Int] -> [Int]
+findNeighbouringNodes nodesMap node offsets = 
+    (Prelude.map fromJust . Prelude.filter isJust . Prelude.map (findIn nodesMap)) (neighbours node offsets)
 
-findNeighbouringNodes :: Map Int [Int] -> [Int] -> [Int]
-findNeighbouringNodes nodesMap = 
-    (join . Prelude.map fromJust . Prelude.filter isJust . Prelude.map (\neighbour -> Data.Map.lookup neighbour nodesMap))
+findIn :: Map Int Int -> Int -> Maybe Int
+findIn nodesMap neighbour = Data.Map.lookup neighbour nodesMap
+
+neighbours :: Int -> [Int] -> [Int]
+neighbours me offsets = Prelude.map (xor me) offsets ++ 
+                        Prelude.map (\pair -> xor me ((pair !! 0) .|. (pair !! 1))) (combinationsOf 2 offsets)
           
-toMap :: [Int] -> Map Int [Int]
-toMap nodes = Data.Map.fromList  $ Prelude.map asMapEntry nodesWithIndexes
-              where nodesWithIndexes = (zip [0..] nodes)
-                       
-asMapEntry :: (Int, Int) -> (Int, [Int])
-asMapEntry pair = (snd pair, [fst pair])
+toMap :: [Int] -> Map Int Int
+toMap nodes = Data.Map.fromList (zip nodes [0..])
           
 -- findMaxClusters :: String -> Int
 findMaxClusters fileContents = 
