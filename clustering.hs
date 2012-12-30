@@ -2,16 +2,14 @@ import System.IO
 import Data.List.Split
 import Data.Char
 import Data.Bits
-import Control.Monad
+import qualified Control.Monad as Monad
 import UnionFind
 
 import qualified Data.Map as Map
-import qualified Data.List
 import qualified Data.Set as Set
+import qualified Data.List as List
 import Data.Maybe as Maybe
     
-file = "clustering2.txt"
-
 -- subsets of size k
 combinationsOf 0 _ = [[]]
 combinationsOf _ [] = []
@@ -24,17 +22,19 @@ maxCluster bits nodes unionFind nodesMap =
 
 nodesToMerge :: [Int] -> Map.Map Int Int -> [Int] -> [(Int, Int)]
 nodesToMerge nodes nodesMap offsets = 
-    concatMap nodeCombinations (zip [0..] nodes)    
+    List.sort . Set.toList . Set.fromList . map smallestIdFirst . concatMap nodeCombinations $ (zip [0..] nodes)    
+    -- List.sort . map smallestIdFirst . concatMap nodeCombinations $ (zip [0..] nodes)    
     where nodeCombinations (nodeIndex, node) = zip (repeat nodeIndex) (getNeighbours node)
-          getNeighbours node = join . map (maybeToList . findInNodesMap) $ neighbours node
+          getNeighbours node = Monad.join . map (maybeToList . findInNodesMap) $ neighbours node
           findInNodesMap neighbour = Map.lookup neighbour nodesMap
           neighbours node = map (xor node) offsets ++ 
                             map (\pair -> xor node ((pair !! 0) .|. (pair !! 1))) (combinationsOf 2 offsets)
+          smallestIdFirst (id1, id2) = if id1 > id2 then (id2, id1) else (id1, id2)
 
 -- findMaxClusters :: String -> Int
 findMaxClusters fileContents = 
     -- size nodesMap
-    -- nodesToMerge nodes nodesMap (offsets bits)
+    -- nodesToMerge nodes nodesMap (map (shiftL 1) [0..(bits - 1)])
     maxCluster bits nodes unionFind nodesMap
     where (bits,nodes) = process fileContents
           unionFind = (emptyEquivalence (0, length nodes-1)) 
@@ -50,6 +50,6 @@ process fileContents = (bits, nodes)
                              extractBits header = read $ (splitOn " " header) !! 1 
 
 main = do     
-    withFile file ReadMode (\handle -> do  
+    withFile "clustering2.txt" ReadMode (\handle -> do  
         contents <- hGetContents handle     
         (putStrLn . show . findMaxClusters) contents)    
