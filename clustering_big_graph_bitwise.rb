@@ -47,22 +47,14 @@ def close_friends(me, offsets)
   friends_differing_by_one + friends_differing_by_two
 end
 
-set = UnionFind.new number_of_nodes
-
-nodes = file.drop(1).map { |x| x.gsub(/\n/, "").gsub(/ /, "").to_i(2)}
+nodes = file.drop(1).map { |x| x.gsub(/\n/, "").gsub(/ /, "").to_i(2) }.sort.uniq
 
 @magical_hash = {}
 nodes.each_with_index do |node, index|
-  @magical_hash[node] ||= []
-  @magical_hash[node] << index
+    @magical_hash[node] = [index]
 end
 
-@magical_hash.each_pair do |key, value|
-  if value.size > 1
-    value.combination(2).to_a.each { |x, y| set.union(x, y)  }
-  end
-end
-
+set = UnionFind.new (@magical_hash.size)
 
 combinations = []
 
@@ -75,5 +67,5 @@ end
 
 # p combinations
 # puts "size #{combinations.size}"
-# puts "size: #{set.number_of_clusters}"
-p set.cluster_leaders
+puts "size: #{set.number_of_clusters}"
+# p set.cluster_leaders
