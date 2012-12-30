@@ -62,14 +62,17 @@ offsets = (0..(bits - 1)).map { |x| 2 ** x }
 nodes.each_with_index do |node, index|  
   close_friends(node, offsets).each do |friend|
     friend_index = @magical_hash[friend]
-    if friend_index
-      combinations << [index, friend_index]
-      set.union(index, friend_index)
-    end
+    combinations << [index, friend_index] if friend_index   
   end
 end
 
-# p combinations
-# puts "size #{combinations.size}"
+combinations = combinations.map { |x, y| x > y ? [y, x] : [x,y]  }.sort.uniq
+
+combinations.each do |index, friend_index|
+  set.union(index, friend_index)
+end
+
+p combinations
+puts "size #{combinations.size}"
 puts "size: #{set.number_of_clusters}"
 # p set.cluster_leaders
