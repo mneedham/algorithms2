@@ -55,14 +55,11 @@ findNeighbouringNodes nodesMap =
     (join . Prelude.map fromJust . Prelude.filter isJust . Prelude.map (\neighbour -> Data.Map.lookup neighbour nodesMap))
           
 toMap :: [Int] -> Map Int [Int]
-toMap nodes = Data.Map.fromList  $ Prelude.map asMapEntry $ (groupIgnoringIndex . sortIgnoringIndex) nodesWithIndexes
+toMap nodes = Data.Map.fromList  $ Prelude.map asMapEntry nodesWithIndexes
               where nodesWithIndexes = (zip [0..] nodes)
-              
-groupIgnoringIndex = groupBy (\(_,x) (_,y) -> x == y)   
-sortIgnoringIndex = sortBy (\(_,x) (_,y) -> x `compare` y)
-         
-asMapEntry :: [(Int, Int)] -> (Int, [Int])
-asMapEntry nodesWithIndexes = ((snd . head) nodesWithIndexes, [(fst . head) nodesWithIndexes])
+                       
+asMapEntry :: (Int, Int) -> (Int, [Int])
+asMapEntry pair = (snd pair, [fst pair])
           
 -- findMaxClusters :: String -> Int
 findMaxClusters fileContents = 
