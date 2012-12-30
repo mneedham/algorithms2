@@ -51,7 +51,7 @@ nodes = file.drop(1).map { |x| x.gsub(/\n/, "").gsub(/ /, "").to_i(2) }.sort.uni
 
 @magical_hash = {}
 nodes.each_with_index do |node, index|
-    @magical_hash[node] = [index]
+    @magical_hash[node] = index
 end
 
 set = UnionFind.new (@magical_hash.size)
@@ -61,7 +61,11 @@ combinations = []
 offsets = (0..(bits - 1)).map { |x| 2 ** x }
 nodes.each_with_index do |node, index|  
   close_friends(node, offsets).each do |friend|
-    (@magical_hash[friend] || []).each { |friend_index| combinations << [index, friend_index]; set.union(index, friend_index) }
+    friend_index = @magical_hash[friend]
+    if friend_index
+      combinations << [index, friend_index]
+      set.union(index, friend_index)
+    end
   end
 end
 
