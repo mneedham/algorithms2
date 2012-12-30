@@ -8,6 +8,7 @@ import UnionFind
 import Data.Map
 import Data.List
 import Data.Maybe
+import Data.Set
     
 file = "clustering2.txt"
 
@@ -35,7 +36,7 @@ neighbours me offsets = Prelude.map (xor me) offsets ++
 process :: String -> (Int, [Int])
 process fileContents = (bits, nodes)
     where bits = extractBits $ processedFileContents !! 0
-          nodes = Prelude.map (toDecimal . trimSpaces) . (drop 1) $ processedFileContents
+          nodes = (Data.Set.toList . Data.Set.fromList) $ Prelude.map (toDecimal . trimSpaces) . (drop 1) $ processedFileContents
           processedFileContents = splitOn "\n" fileContents
 
 maxCluster :: Int -> [Int] -> Equivalence Int -> Map Int [Int] -> Int
@@ -54,14 +55,14 @@ findNeighbouringNodes nodesMap =
     (join . Prelude.map fromJust . Prelude.filter isJust . Prelude.map (\neighbour -> Data.Map.lookup neighbour nodesMap))
           
 toMap :: [Int] -> Map Int [Int]
-toMap nodes = Data.Map.fromList $ Prelude.map asMapEntry $ (groupIgnoringIndex . sortIgnoringIndex) nodesWithIndexes
+toMap nodes = Data.Map.fromList  $ Prelude.map asMapEntry $ (groupIgnoringIndex . sortIgnoringIndex) nodesWithIndexes
               where nodesWithIndexes = (zip [0..] nodes)
               
 groupIgnoringIndex = groupBy (\(_,x) (_,y) -> x == y)   
 sortIgnoringIndex = sortBy (\(_,x) (_,y) -> x `compare` y)
          
 asMapEntry :: [(Int, Int)] -> (Int, [Int])
-asMapEntry nodesWithIndexes = ((snd . head) nodesWithIndexes, Prelude.foldl (\acc (x,_) -> acc ++ [x]) [] nodesWithIndexes)
+asMapEntry nodesWithIndexes = ((snd . head) nodesWithIndexes, [(fst . head) nodesWithIndexes])
           
 -- findMaxClusters :: String -> Int
 findMaxClusters fileContents = 
@@ -69,9 +70,7 @@ findMaxClusters fileContents =
     -- nodesToMerge nodes nodesMap (offsets bits)
     maxCluster bits nodes unionFind nodesMap
     where (bits,nodes) = process fileContents
-          unionFind = Data.Map.fold (\value acc -> Prelude.foldl (\uf pair -> equate (pair !! 0) (pair !! 1) uf) acc (combinationsOf 2 value)) 
-                                    (emptyEquivalence (0, length nodes-1)) 
-                                    (toMap nodes)
+          unionFind = (emptyEquivalence (0, length nodes-1)) 
           nodesMap = toMap nodes
 
 main = do     
