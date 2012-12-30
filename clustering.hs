@@ -9,10 +9,11 @@ import Leaders
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 import qualified Data.List as List
-import Data.Maybe as Maybe
+import qualified Data.Maybe as Maybe
 
 import Debug.Trace
     
+-- http://www.polyomino.f2s.com/david/haskell/hs/CombinatoricsGeneration.hs.txt
 -- subsets of size k
 combinationsOf 0 _ = [[]]
 combinationsOf _ [] = []
@@ -29,10 +30,9 @@ nodesToMerge :: [Int] -> Map.Map Int Int -> [Int] -> [(Int, Int)]
 nodesToMerge nodes nodesMap offsets = 
     List.sort . Set.toList . Set.fromList . map smallestIdFirst . concatMap nodeCombinations $ (zip [0..] nodes)     
     where nodeCombinations (nodeIndex, node) = zip (repeat nodeIndex) (getNeighbours node)
-          getNeighbours node = Monad.join . map (maybeToList . findInNodesMap) $ neighbours node
+          getNeighbours node = Monad.join . map (Maybe.maybeToList . findInNodesMap) $ neighbours node
           findInNodesMap neighbour = Map.lookup neighbour nodesMap
-          neighbours node = map (xor node) offsets ++ 
-                            map (\(x:y:_) -> xor node (x .|. y)) (combinationsOf 2 offsets)
+          neighbours node = map (xor node) offsets ++ map (\(x:y:_) -> xor node (x .|. y)) (combinationsOf 2 offsets)
           smallestIdFirst (id1, id2) = if id1 > id2 then (id2, id1) else (id1, id2)
 
 -- findMaxClusters :: String -> Int
@@ -51,7 +51,7 @@ process fileContents = (bits, nodes)
                              nodes = Set.toList . Set.fromList . map (toDecimal . trimSpaces) . (drop 1) $ processedFileContents
                              processedFileContents = splitOn "\n" fileContents
                              trimSpaces = filter (not . isSpace)
-                             toDecimal = foldr (\c s -> s * 2 + c) 0 . reverse . map digitToInt 
+                             toDecimal = foldr (\c s -> s * 2 + c) 0 . reverse . map digitToInt -- http://pleac.sourceforge.net/pleac_haskell/numbers.html
                              extractBits header = read $ (splitOn " " header) !! 1 
 
 main = do     
