@@ -17,31 +17,14 @@ combinationsOf 0 _ = [[]]
 combinationsOf _ [] = []
 combinationsOf k (x:xs) = Prelude.map (x:) (combinationsOf (k-1) xs) ++ combinationsOf k xs
 
-extractBits :: String -> Int
-extractBits header = read $ (splitOn " " header) !! 1 
-
-toDecimal :: String -> Int
-toDecimal = Prelude.foldr (\c s -> s * 2 + c) 0 . reverse . Prelude.map digitToInt 
-
-trimSpaces :: String -> String
-trimSpaces = Prelude.filter (not . isSpace)
-
-offsets :: Int -> [Int]
-offsets bits = Prelude.map (shiftL 1) [0..(bits - 1)]
-
-process :: String -> (Int, [Int])
-process fileContents = (bits, nodes)
-    where bits = extractBits $ processedFileContents !! 0
-          nodes = (Data.Set.toList . Data.Set.fromList) $ Prelude.map (toDecimal . trimSpaces) . (drop 1) $ processedFileContents
-          processedFileContents = splitOn "\n" fileContents
-
 maxCluster :: Int -> [Int] -> Equivalence Int -> Map Int Int -> Int
 maxCluster bits nodes unionFind nodesMap = 
-    numberOfComponents $ Data.List.foldl (\uf (x,y) -> equate x y uf) unionFind (nodesToMerge nodes nodesMap (offsets bits))
+    numberOfComponents $ Data.List.foldl (\uf (x,y) -> equate x y uf) unionFind (nodesToMerge nodes nodesMap offsets)
+    where offsets = Prelude.map (shiftL 1) [0..(bits - 1)]
 
 nodesToMerge :: [Int] -> Map Int Int -> [Int] -> [(Int, Int)]
 nodesToMerge nodes nodesMap offsets = 
-    Prelude.concatMap nodeCombinations (zip [0..] nodes)    
+    concatMap nodeCombinations (zip [0..] nodes)    
     where nodeCombinations (nodeIndex, node) = zip (repeat nodeIndex) (getNeighbours node)
           getNeighbours node = join . Prelude.map (maybeToList . findInNodesMap) $ neighbours node
           findInNodesMap neighbour = Data.Map.lookup neighbour nodesMap
@@ -56,6 +39,15 @@ findMaxClusters fileContents =
     where (bits,nodes) = process fileContents
           unionFind = (emptyEquivalence (0, length nodes-1)) 
           nodesMap = Data.Map.fromList (zip nodes [0..])
+
+process :: String -> (Int, [Int])
+process fileContents = (bits, nodes)
+                       where bits = extractBits $ processedFileContents !! 0
+                             nodes = Data.Set.toList . Data.Set.fromList . Prelude.map (toDecimal . trimSpaces) . (drop 1) $ processedFileContents
+                             processedFileContents = splitOn "\n" fileContents
+                             trimSpaces = Prelude.filter (not . isSpace)
+                             toDecimal = Prelude.foldr (\c s -> s * 2 + c) 0 . reverse . Prelude.map digitToInt 
+                             extractBits header = read $ (splitOn " " header) !! 1 
 
 main = do     
     withFile file ReadMode (\handle -> do  
