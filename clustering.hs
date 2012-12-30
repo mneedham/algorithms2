@@ -47,10 +47,7 @@ nodesToMerge nodes nodesMap offsets =
 neighbours :: Int -> [Int] -> [Int]
 neighbours me offsets = Prelude.map (xor me) offsets ++ 
                         Prelude.map (\pair -> xor me ((pair !! 0) .|. (pair !! 1))) (combinationsOf 2 offsets)
-          
-toMap :: [Int] -> Map Int Int
-toMap nodes = Data.Map.fromList (zip nodes [0..])
-          
+                    
 -- findMaxClusters :: String -> Int
 findMaxClusters fileContents = 
     -- size nodesMap
@@ -58,7 +55,7 @@ findMaxClusters fileContents =
     maxCluster bits nodes unionFind nodesMap
     where (bits,nodes) = process fileContents
           unionFind = (emptyEquivalence (0, length nodes-1)) 
-          nodesMap = toMap nodes
+          nodesMap = Data.Map.fromList (zip nodes [0..])
 
 main = do     
     withFile file ReadMode (\handle -> do  
