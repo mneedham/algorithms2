@@ -4,7 +4,8 @@ import Data.Char
 import Data.Bits
 import qualified Control.Monad as Monad
 -- import UnionFind
-import Leaders
+-- import Leaders
+import MutableLeaders
 
 import qualified Data.Map as Map
 import qualified Data.Set as Set
@@ -12,6 +13,10 @@ import qualified Data.List as List
 import qualified Data.Maybe as Maybe
 
 import Debug.Trace
+
+import Data.Array.IO
+import Data.Array.MArray
+import Data.Array
     
 -- http://www.polyomino.f2s.com/david/haskell/hs/CombinatoricsGeneration.hs.txt
 -- subsets of size k
@@ -19,11 +24,13 @@ combinationsOf 0 _ = [[]]
 combinationsOf _ [] = []
 combinationsOf k (x:xs) = map (x:) (combinationsOf (k-1) xs) ++ combinationsOf k xs
 
-maxCluster :: Int -> [Int] -> UnionSet Int -> Map.Map Int Int -> Int
+-- maxCluster :: Int -> [Int] -> UnionSet Int  -> Map.Map Int Int -> Int
+maxCluster :: Int -> [Int] -> IO (IOArray Int Int)  -> Map.Map Int Int -> IO Int
 -- maxCluster :: Int -> [Int] -> Equivalence Int -> Map.Map Int Int -> Int
 maxCluster bits nodes unionFind nodesMap = 
     -- numberOfComponents $ foldl (\uf (x,y) -> equate x y uf) unionFind (nodesToMerge nodes nodesMap offsets)
-    numberOfComponents $ foldl (\uf (x,y) -> Leaders.union uf x y) unionFind (nodesToMerge nodes nodesMap offsets)    
+    -- numberOfComponents $ foldl (\uf (x,y) -> Leaders.union uf x y) unionFind (nodesToMerge nodes nodesMap offsets)    
+    numberOfComponents $ foldl (\uf (x,y) -> MutableLeaders.union uf x y) unionFind (nodesToMerge nodes nodesMap offsets)        
     where offsets = map (shiftL 1) [0..(bits - 1)]
 
 nodesToMerge :: [Int] -> Map.Map Int Int -> [Int] -> [(Int, Int)]
@@ -56,5 +63,7 @@ process fileContents = (bits, nodes)
 
 main = do     
     withFile "clustering2.txt" ReadMode (\handle -> do  
-        contents <- hGetContents handle     
-        (putStrLn . show . findMaxClusters) contents)    
+        contents <- hGetContents handle   
+        -- let numberOfClusters = findMaxClusters contents 
+        numberOfClusters <- findMaxClusters contents           
+        (putStrLn . show) numberOfClusters)    

@@ -48,7 +48,8 @@ union arrayContainer x y = do
     ls <- getAssocs actualArray
     leader1 <- readArray actualArray x
     leader2 <- readArray actualArray y
-    let newValues = map (\(index, value) -> if value == leader1 then (index, leader2) else (index, value)) ls
+    -- let newValues = map (\(index, value) -> if value == leader1 then (index, leader2) else (index, value)) ls
+    let newValues = map (\(index, value) -> (index, leader2)) . filter (\(index, value) -> value == leader1) $ ls
     sequence $ map (\(idx, val) -> writeArray actualArray idx val) newValues
     return actualArray           
 

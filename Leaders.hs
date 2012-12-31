@@ -54,8 +54,8 @@ union (UnionSet leaders) x y = unsafePerformIO $ do
     ls <- readIORef leaders
     let leader1 = ls ! x 
         leader2 = ls ! y
-        newLeaders = map (\(index, value) -> if value == leader1 then (index, leader2) else (index, value)) (assocs ls)
-        -- newLeaders = map (\(index, value) -> (index, leader2)) . filter (\(index, value) -> value == leader1) $ assocs ls
+        -- newLeaders = map (\(index, value) -> if value == leader1 then (index, leader2) else (index, value)) (assocs ls)
+        newLeaders = map (\(index, value) -> (index, leader2)) . filter (\(index, value) -> value == leader1) $ assocs ls
     -- modifyIORef leaders (\l -> l // newLeaders)
     writeIORef leaders (ls // newLeaders)    
     -- lAfter <- readIORef leaders
