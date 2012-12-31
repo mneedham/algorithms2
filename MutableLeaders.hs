@@ -6,6 +6,8 @@ module MutableLeaders (
     )
     where
 
+import System.CPUTime
+import Control.DeepSeq
 import Data.Array.IO
 import Data.Array.MArray
 import Data.Array
@@ -48,9 +50,15 @@ union arrayContainer x y = do
     ls <- getAssocs actualArray
     leader1 <- readArray actualArray x
     leader2 <- readArray actualArray y
+    
+    -- (start, end) <- getBounds actualArray
+    -- sequence $ map (\idx -> update arrayContainer idx leader1 leader2 ) [start..end]
+    -- [start..end]
+    
     -- let newValues = map (\(index, value) -> if value == leader1 then (index, leader2) else (index, value)) ls
-    let newValues = map (\(index, value) -> (index, leader2)) . filter (\(index, value) -> value == leader1) $ ls
+    let newValues = (map (\(index, value) -> (index, leader1)) . filter (\(index, value) -> value == leader2)) ls
     sequence $ map (\(idx, val) -> writeArray actualArray idx val) newValues
+    -- sequence $ map (\(idx, val) -> writeArray actualArray idx val) newValues
     return actualArray           
 
 -- update :: [(Int, Int)] -> IO (IOArray Int Int) -> IO (IOArray Int Int)
@@ -69,5 +77,15 @@ union arrayContainer x y = do
 --     uf <- update [(0, 5), (3, 4)] $ create (0,10)
 --     values <- getAssocs uf
 --     putStrLn (show values)
+
+update :: IO (IOArray Int Int) -> Int -> Int -> Int -> IO (IOArray Int Int)
+update arrayContainer index newValue checkValue = do
+     actualArray <- arrayContainer
+     lookedUpValue <- readArray actualArray index
+     if lookedUpValue == checkValue then 
+         writeArray actualArray index newValue         
+     else
+         writeArray actualArray index lookedUpValue         
+     return actualArray
     
     
