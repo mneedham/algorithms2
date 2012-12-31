@@ -32,6 +32,7 @@ create is = UnionSet (ref (arrayFrom is id))
 extractComponents :: Ix i => DiffArray i i -> [i]    
 extractComponents  = Set.toList . Set.fromList . ArrayDiff.elems
 
+-- functions on arrays http://zvon.org/other/haskell/Outputarray/index.html
 components :: Ix i => UnionSet i -> [i]
 components (UnionSet leaders) = unsafePerformIO $ do
     l <- readIORef leaders
@@ -41,7 +42,6 @@ numberOfComponents :: Ix i => UnionSet i -> Int
 numberOfComponents (UnionSet leaders) = unsafePerformIO $ do
     l <- readIORef leaders
     return (length $ extractComponents l)    
-
 
 inSameComponent :: Ix i => UnionSet i -> i -> i -> Bool
 inSameComponent (UnionSet leaders) x y = unsafePerformIO $ do
@@ -54,12 +54,15 @@ union (UnionSet leaders) x y = unsafePerformIO $ do
     ls <- readIORef leaders
     let leader1 = ls ! x 
         leader2 = ls ! y
-        -- newLeaders = map (\(index, value) -> if value == leader1 then (index, leader2) else (index, value)) (assocs ls)
-        newLeaders = map (\(index, value) -> (index, leader2)) . filter (\(index, value) -> value == leader1) $ assocs ls
-    modifyIORef leaders (\l -> l // newLeaders)
+        newLeaders = map (\(index, value) -> if value == leader1 then (index, leader2) else (index, value)) (assocs ls)
+        -- newLeaders = map (\(index, value) -> (index, leader2)) . filter (\(index, value) -> value == leader1) $ assocs ls
+    -- modifyIORef leaders (\l -> l // newLeaders)
+    writeIORef leaders (ls // newLeaders)    
     -- lAfter <- readIORef leaders
     -- trace ("Before:" ++ show lBefore ++ ", After:" ++ show lAfter) $ return (UnionSet leaders)
-    return (UnionSet leaders)
+    return $ UnionSet leaders
+    -- return (UnionSet (ref $ array (0, (length newLeaders - 1)) newLeaders))
+    -- return (UnionSet (ref $ array (0, (length (assocs ls) - 1)) (ls // newLeaders)))
     
     -- return if id1 == id2
     -- leader_1, leader_2 = @leaders[id1], @leaders[id2]
