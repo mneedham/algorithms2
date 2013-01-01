@@ -24,12 +24,12 @@ combinationsOf 0 _ = [[]]
 combinationsOf _ [] = []
 combinationsOf k (x:xs) = map (x:) (combinationsOf (k-1) xs) ++ combinationsOf k xs
 
+-- maxCluster :: Int -> [Int] -> Equivalence Int -> Map.Map Int Int -> Int
 -- maxCluster :: Int -> [Int] -> UnionSet Int  -> Map.Map Int Int -> Int
 maxCluster :: Int -> [Int] -> IO (IOArray Int Int)  -> Map.Map Int Int -> IO Int
--- maxCluster :: Int -> [Int] -> Equivalence Int -> Map.Map Int Int -> Int
 maxCluster bits nodes unionFind nodesMap = 
     -- numberOfComponents $ foldl (\uf (x,y) -> equate x y uf) unionFind (nodesToMerge nodes nodesMap offsets)
-    -- numberOfComponents $ foldl (\uf (x,y) -> Leaders.union uf x y) unionFind (nodesToMerge nodes nodesMap offsets)    
+    -- numberOfComponents $ foldl (\uf (x,y) -> Leaders.union x y uf) unionFind (nodesToMerge nodes nodesMap offsets)    
     numberOfComponents $ foldl (\uf (x,y) -> MutableLeaders.union uf x y) unionFind (nodesToMerge nodes nodesMap offsets)        
     where offsets = map (shiftL 1) [0..(bits - 1)]
 
@@ -43,19 +43,18 @@ nodesToMerge nodes nodesMap offsets =
           smallestIdFirst (id1, id2) = if id1 > id2 then (id2, id1) else (id1, id2)
 
 -- findMaxClusters :: String -> Int
-findMaxClusters fileContents = 
+findMaxClusters (bits, nodes) = 
     -- size nodesMap
     -- nodesToMerge nodes nodesMap (map (shiftL 1) [0..(bits - 1)])
     maxCluster bits nodes unionFind nodesMap
-    where (bits,nodes) = process fileContents
-          -- unionFind = (emptyEquivalence (0, length nodes-1)) 
+    where -- unionFind = (emptyEquivalence (0, length nodes-1)) 
           unionFind = (create (0, length nodes-1))           
           nodesMap = Map.fromList (zip nodes [0..])
 
 process :: String -> (Int, [Int])
 process fileContents = (bits, nodes)
                        where bits = extractBits $ processedFileContents !! 0
-                             nodes = Set.toList . Set.fromList . map (toDecimal . trimSpaces) . (drop 1) $ processedFileContents
+                             nodes = List.sort $ Set.toList . Set.fromList . map (toDecimal . trimSpaces)  . (drop 1) $ processedFileContents
                              processedFileContents = splitOn "\n" fileContents
                              trimSpaces = filter (not . isSpace)
                              toDecimal = foldr (\c s -> s * 2 + c) 0 . reverse . map digitToInt -- http://pleac.sourceforge.net/pleac_haskell/numbers.html
@@ -65,5 +64,5 @@ main = do
     withFile "clustering2.txt" ReadMode (\handle -> do  
         contents <- hGetContents handle   
         -- let numberOfClusters = findMaxClusters contents 
-        numberOfClusters <- findMaxClusters contents           
+        numberOfClusters <- (findMaxClusters . process) contents
         (putStrLn . show) numberOfClusters)    
