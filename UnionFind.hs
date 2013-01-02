@@ -70,12 +70,12 @@ emptyEquivalence is = Equivalence (arrayFrom is (const 0))
 numberOfComponents :: Ix i => Equivalence i -> Int
 numberOfComponents (Equivalence rs vps) = unsafePerformIO $ do
     ps <- readIORef vps
-    return ((size . fromList . Data.Array.Diff.elems) ps)
+    return ((size . fromList . (Prelude.filter (\(idx, parent) -> idx == parent)) . Data.Array.Diff.assocs) ps)
     
-components :: Ix i => Equivalence i -> [i]
+components :: Ix i => Equivalence i -> [(i,i)]
 components (Equivalence rs vps) = unsafePerformIO $ do
     ps <- readIORef vps
-    return ((toList . fromList . Data.Array.Diff.elems) ps)
+    return ((toList . fromList . Data.Array.Diff.assocs) ps)
       
 
 reprHelper :: Ix i => DiffArray i i -> i -> (Maybe (DiffArray i i), i)
