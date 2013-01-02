@@ -34,8 +34,8 @@ create (start, end) = do
 numberOfComponents :: IO (IOArray Int Int) -> IO (Int)
 numberOfComponents arrayContainer = do
     actualArray <- arrayContainer
-    ls <- getElems actualArray
-    return $ (length . Set.toList . Set.fromList) ls 
+    ls <- getAssocs actualArray
+    return $ (length . (Prelude.filter (\(idx, parent) -> idx == parent)) ) ls 
     
 inSameComponent :: IO (IOArray Int Int) -> Int -> Int -> IO (Bool)   
 inSameComponent arrayContainer x y = do 
@@ -44,22 +44,32 @@ inSameComponent arrayContainer x y = do
     yLeader <- readArray actualArray y
     return $ (xLeader == yLeader)
 
+-- union :: IO (IOArray Int Int) -> Int -> Int -> IO (IOArray Int Int)
+-- union arrayContainer x y = do
+--     actualArray <- arrayContainer
+--     ls <- getAssocs actualArray
+--     leader1 <- readArray actualArray x
+--     leader2 <- readArray actualArray y
+--     
+--     -- (start, end) <- getBounds actualArray
+--     -- sequence $ map (\idx -> update arrayContainer idx leader1 leader2 ) [start..end]
+--     -- [start..end]
+--     
+--     -- let newValues = map (\(index, value) -> if value == leader1 then (index, leader2) else (index, value)) ls
+--     let newValues = (map (\(index, value) -> (index, leader1)) . filter (\(index, value) -> value == leader2)) ls
+--     sequence $ map (\(idx, val) -> writeArray actualArray idx val) newValues
+--     -- sequence $ map (\(idx, val) -> writeArray actualArray idx val) newValues
+--     return actualArray         
+
 union :: IO (IOArray Int Int) -> Int -> Int -> IO (IOArray Int Int)
 union arrayContainer x y = do
     actualArray <- arrayContainer
     ls <- getAssocs actualArray
     leader1 <- readArray actualArray x
     leader2 <- readArray actualArray y
-    
-    -- (start, end) <- getBounds actualArray
-    -- sequence $ map (\idx -> update arrayContainer idx leader1 leader2 ) [start..end]
-    -- [start..end]
-    
-    -- let newValues = map (\(index, value) -> if value == leader1 then (index, leader2) else (index, value)) ls
     let newValues = (map (\(index, value) -> (index, leader1)) . filter (\(index, value) -> value == leader2)) ls
     sequence $ map (\(idx, val) -> writeArray actualArray idx val) newValues
-    -- sequence $ map (\(idx, val) -> writeArray actualArray idx val) newValues
-    return actualArray           
+    return actualArray  
 
 -- update :: [(Int, Int)] -> IO (IOArray Int Int) -> IO (IOArray Int Int)
 -- update newValues arrayContainer = do
