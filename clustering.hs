@@ -30,7 +30,7 @@ maxCluster :: Int -> [Int] -> IO (IOArray Int Int)  -> Map.Map Int Int -> IO Int
 maxCluster bits nodes unionFind nodesMap = 
     -- numberOfComponents $ foldl (\uf (x,y) -> equate x y uf) unionFind (nodesToMerge nodes nodesMap offsets)
     -- numberOfComponents $ foldl (\uf (x,y) -> Leaders.union x y uf) unionFind (nodesToMerge nodes nodesMap offsets)    
-    numberOfComponents $ foldl (\uf (x,y) -> MutableLeaders.union uf x y) unionFind (nodesToMerge nodes nodesMap offsets)        
+    numberOfComponents $ foldl (\uf (x,y) -> MutableLeaders.union x y uf) unionFind (nodesToMerge nodes nodesMap offsets)        
     where offsets = map (shiftL 1) [0..(bits - 1)]
 
 nodesToMerge :: [Int] -> Map.Map Int Int -> [Int] -> [(Int, Int)]
@@ -47,7 +47,8 @@ findMaxClusters (bits, nodes) =
     -- size nodesMap
     -- nodesToMerge nodes nodesMap (map (shiftL 1) [0..(bits - 1)])
     maxCluster bits nodes unionFind nodesMap
-    where -- unionFind = (emptyEquivalence (0, length nodes-1)) 
+    where 
+          -- unionFind = (emptyEquivalence (0, length nodes-1)) 
           unionFind = (create (0, length nodes-1))           
           nodesMap = Map.fromList (zip nodes [0..])
 
@@ -60,9 +61,8 @@ process fileContents = (bits, nodes)
                              toDecimal = foldr (\c s -> s * 2 + c) 0 . reverse . map digitToInt -- http://pleac.sourceforge.net/pleac_haskell/numbers.html
                              extractBits header = read $ (splitOn " " header) !! 1 
 
-main = do     
-    withFile "clustering2.txt" ReadMode (\handle -> do  
-        contents <- hGetContents handle   
-        -- let numberOfClusters = findMaxClusters contents 
-        numberOfClusters <- (findMaxClusters . process) contents
-        (putStrLn . show) numberOfClusters)    
+main = do 
+    contents <- readFile "clustering2.txt" 
+    -- let numberOfClusters = (findMaxClusters . process) contents
+    numberOfClusters <- (findMaxClusters . process) contents
+    putStrLn (show numberOfClusters)   

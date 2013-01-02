@@ -61,13 +61,21 @@ inSameComponent arrayContainer x y = do
 --     -- sequence $ map (\(idx, val) -> writeArray actualArray idx val) newValues
 --     return actualArray         
 
-union :: IO (IOArray Int Int) -> Int -> Int -> IO (IOArray Int Int)
-union arrayContainer x y = do
-    actualArray <- arrayContainer
-    ls <- getAssocs actualArray
-    leader1 <- readArray actualArray x
-    leader2 <- readArray actualArray y
-    let newValues = (map (\(index, value) -> (index, leader1)) . filter (\(index, value) -> value == leader2)) ls
+findParent :: IOArray Int Int -> Int -> IO Int
+findParent actualArray index = do
+    parent <- readArray actualArray index
+    return parent
+    if parent == index 
+        then return parent
+    else
+        findParent actualArray parent
+
+union :: Int -> Int ->  IO (IOArray Int Int) -> IO (IOArray Int Int)
+union x y arrayContainer = do    
+    actualArray <- arrayContainer    
+    leader1 <- findParent actualArray x
+    leader2 <- findParent actualArray y
+    let newValues = if leader1 == leader2 then [] else [(leader1, leader2)]
     sequence $ map (\(idx, val) -> writeArray actualArray idx val) newValues
     return actualArray  
 
