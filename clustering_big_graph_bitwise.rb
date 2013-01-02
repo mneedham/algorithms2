@@ -12,16 +12,23 @@ class UnionFind
   
   def union(id1,id2)
     return if id1 == id2
-    leader_1, leader_2 = @leaders[id1], @leaders[id2]
-    @leaders.map! {|i| (i == leader_1) ? leader_2 : i }
+    leader_1, leader_2 = find_parent(id1), find_parent(id2)
+    @leaders[leader_1]= leader_2
+  end
+  
+  def find_parent(index)
+    parent = @leaders[index]
+    return index  if parent == index
+    find_parent(parent)
   end
   
   def number_of_clusters
-    Set.new(@leaders).size
+    @leaders.each_with_index.select { |value, index| index == value }.size
+    # Set.new(@leaders).size
   end
   
   def cluster_leaders
-    Set.new(@leaders)
+    @leaders.each_with_index.select { |value, index| index == value }
   end
 end
 
