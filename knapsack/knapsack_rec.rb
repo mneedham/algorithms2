@@ -32,11 +32,7 @@ def knapsack_cached(rows, knapsack_size, index)
     if @cache[index-1][knapsack_size].nil?
       option_1  = knapsack_cached(rows, knapsack_size, index-1)
       option_2 = value + knapsack_cached(rows, knapsack_size - weight, index-1)
-      if option_1 > option_2
-        @cache[index-1][knapsack_size] = option_1
-      else
-        @cache[index-1][knapsack_size] = option_2
-      end
+      @cache[index-1][knapsack_size] = option_1 > option_2 ? option_1 : option_2
     end
     
     return @cache[index-1][knapsack_size]
