@@ -10,9 +10,12 @@ cache[0].each_with_index { |value, weight| cache[0][weight] = 0  }
 
 rows = file.drop(1).map { |row| row.split(" ").map(&:to_i)}
 
+@iterations = 0
+
 (1..number_of_items).each do |i|
   value, weight = rows[i-1]
   (0..knapsack_size).each do |x|
+    @iterations = @iterations+1
     # puts "weight: #{weight}, x: #{x}, i:#{i}"
     if weight > x
       cache[i][x] = cache[i-1][x] 
@@ -27,3 +30,4 @@ end
 # end
 
 p cache[number_of_items][knapsack_size]
+puts "Iterations: #{@iterations}"
