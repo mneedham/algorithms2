@@ -5,28 +5,31 @@ import qualified Data.Map as Map
 import Data.Array
 import Data.Maybe
 
-knapsackCached :: [[Int]] -> Int -> Int -> Array Int (Map.Map Int Int) -> Int
+knapsackCached :: [[Int]] -> Int -> Int -> Array Int (Map.Map Int Int) -> Array Int (Map.Map Int Int)
 knapsackCached rows knapsackSize index cache = 
     trace (show cache) $
     -- trace ("ohhhh robin van persie " ++ show knapsackSize ++ " " ++ (show index)) $
     if index == 0 || knapsackSize == 0 
-        then 0
+        then cache
     else
          let (value:weight:_) = rows !! index in
          if weight > knapsackSize && Map.lookup knapsackSize (cache ! (index-1)) == Nothing
              then
-                 let knapsackSizeValue = knapsackCached rows knapsackSize (index-1) cache 
-                     updatedCache = cache // [(index-1, Map.insert knapsackSize knapsackSizeValue (cache ! (index-1)))] in
-                 fromJust $ Map.lookup knapsackSize (updatedCache ! (index-1))
+                 -- let knapsackSizeValue = knapsackCached rows knapsackSize (index-1) cache 
+                     -- updatedCache = cache // [(index-1, Map.insert knapsackSize knapsackSizeValue (cache ! (index-1)))] in
+                 -- fromJust $ Map.lookup knapsackSize (updatedCache ! (index-1))
+                 cache
          else
              if Map.lookup knapsackSize (cache ! (index-1)) == Nothing
                  then 
-                     let knapsackSizeValue = maximum [knapsackCached rows knapsackSize (index-1) cache, 
-                                                      value + knapsackCached rows (knapsackSize-weight) (index-1) cache]
-                         updatedCache = cache // [(index-1, Map.insert knapsackSize knapsackSizeValue (cache ! (index-1)))] in
-                     fromJust $ Map.lookup knapsackSize (updatedCache ! (index - 1))
+                     -- let knapsackSizeValue = maximum [knapsackCached rows knapsackSize (index-1) cache, 
+                                                      -- value + knapsackCached rows (knapsackSize-weight) (index-1) cache]
+                         -- updatedCache = cache // [(index-1, Map.insert knapsackSize knapsackSizeValue (cache ! (index-1)))] in
+                     -- fromJust $ Map.lookup knapsackSize (updatedCache ! (index - 1))
+                     cache
              else
-                 fromJust $ Map.lookup knapsackSize (cache ! (index - 1))
+                 -- fromJust $ Map.lookup knapsackSize (cache ! (index - 1))
+                 cache
         
 process :: String -> (Int, Int, [[Int]])
 process fileContents = (knapsackSize, numberOfItems, rows)
