@@ -2,7 +2,7 @@ import os
 
 def knapsack_cached(rows, knapsack_size, index):
     global cache
-    if(index == 0 or knapsack_size == 0):
+    if(index is 0 or knapsack_size is 0):
         return 0
     else:
         value, weight = rows[index]
