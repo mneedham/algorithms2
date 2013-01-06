@@ -38,5 +38,6 @@ process fileContents = (knapsackSize, numberOfItems, rows)
 main = do 
     contents <- readFile "knapsack_small.txt"
     let (knapsackSize, numberOfItems, rows) = process contents
-        cache = array (0, knapsackSize) [(x,Map.empty) | x<-[0..knapsackSize]]        
-    putStrLn $ show $ knapsackCached rows knapsackSize (numberOfItems-1) cache
+        cache = array (0, knapsackSize) [(x,Map.empty) | x<-[0..knapsackSize]]
+        result  = knapsackCached rows knapsackSize (numberOfItems-1) cache
+    putStrLn $ show $ result
