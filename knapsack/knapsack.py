@@ -9,17 +9,15 @@ def knapsack_cached(rows, knapsack_size, index):
         if(weight > knapsack_size):
             if(knapsack_size not in cache[index-1]):
                 cache[index-1][knapsack_size] = knapsack_cached(rows, knapsack_size, index-1)
-                return cache[index-1][knapsack_size]
-            else: 
-                return cache[index-1][knapsack_size]
+                
+            return cache[index-1][knapsack_size]
         else:
             if(knapsack_size not in cache[index-1]):
                 option_1  = knapsack_cached(rows, knapsack_size, index-1)
                 option_2  = value + knapsack_cached(rows, knapsack_size - weight, index-1)
                 cache[index-1][knapsack_size] = max(option_1, option_2)                
-                return cache[index-1][knapsack_size]
-            else:
-                return cache[index-1][knapsack_size]
+            
+            return cache[index-1][knapsack_size]
                     
 file = open(os.path.dirname(os.path.realpath(__file__)) + "/knapsack2.txt")
 
@@ -38,8 +36,3 @@ for i in range(0, number_of_items):
     
 result = knapsack_cached(rows, knapsack_size, number_of_items-1)    
 print(result)
-
-
-
-            
-
