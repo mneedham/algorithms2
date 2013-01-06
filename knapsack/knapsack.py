@@ -18,9 +18,7 @@ def knapsack_cached(rows, knapsack_size, index):
                     
 file = open(os.path.dirname(os.path.realpath(__file__)) + "/knapsack2.txt")
 
-knapsack_size, number_of_items = file.readline().replace("\n", "").split(" ")
-knapsack_size = int(knapsack_size)
-number_of_items = int(number_of_items)
+knapsack_size, number_of_items = map(lambda x: int(x), file.readline().replace("\n", "").split(" "))
 
 rows = []
 for line in file.readlines():
