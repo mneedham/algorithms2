@@ -7,27 +7,30 @@ import Data.Maybe
 
 knapsackCached :: [[Int]] -> Int -> Int -> Array Int (Map.Map Int Int) -> Array Int (Map.Map Int Int)
 knapsackCached rows knapsackSize index cache = 
-    trace (show cache) $
-    -- trace ("ohhhh robin van persie " ++ show knapsackSize ++ " " ++ (show index)) $
+    trace (show "top: " ++ show cache) $
     if index == 0 || knapsackSize == 0 
         then cache
     else
          let (value:weight:_) = rows !! index in
          if weight > knapsackSize && Map.lookup knapsackSize (cache ! (index-1)) == Nothing
-             then
-                 -- let knapsackSizeValue = knapsackCached rows knapsackSize (index-1) cache 
-                     -- updatedCache = cache // [(index-1, Map.insert knapsackSize knapsackSizeValue (cache ! (index-1)))] in
-                 -- fromJust $ Map.lookup knapsackSize (updatedCache ! (index-1))
-                 cache
+             then                 
+                 let newCache = knapsackCached rows knapsackSize (index-1) cache
+                     newValue = fromJust $ Map.lookup (knapsackSize) (newCache ! (index-1))
+                     updatedCache = newCache // [(index-1, Map.insert knapsackSize newValue (newCache ! (index-1)))] in
+                 trace (show "updatedcache" ++ show newCache) $ updatedCache
          else
              if Map.lookup knapsackSize (cache ! (index-1)) == Nothing
                  then 
-                     -- let knapsackSizeValue = maximum [knapsackCached rows knapsackSize (index-1) cache, 
-                                                      -- value + knapsackCached rows (knapsackSize-weight) (index-1) cache]
-                         -- updatedCache = cache // [(index-1, Map.insert knapsackSize knapsackSizeValue (cache ! (index-1)))] in
-                     -- fromJust $ Map.lookup knapsackSize (updatedCache ! (index - 1))
-                     cache
+                     let newCache1 = knapsackCached rows knapsackSize (index-1) cache
+                         newCache2 = knapsackCached rows (knapsackSize-weight) (index-1) cache
+                         newValue1 = fromJust $ Map.lookup (knapsackSize) (newCache1 ! (index-1))
+                         newValue2 = value + (fromJust $ Map.lookup (knapsackSize-weight) (newCache2 ! (index-1)))
+                         updatedCache = if newValue1 > newValue2 
+                                        then newCache1 // [((index-1), Map.insert knapsackSize newValue1 (newCache1 ! (index-1)))] 
+                                        else newCache2 // [((index-1), Map.insert knapsackSize newValue2 (newCache2 ! (index-1)))] in
+                     trace (show "updatedcache" ++ show updatedCache) $ updatedCache
              else
+                 trace (show "no cache update: " ++ show cache) $
                  -- fromJust $ Map.lookup knapsackSize (cache ! (index - 1))
                  cache
         

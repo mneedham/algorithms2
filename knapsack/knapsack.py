@@ -15,7 +15,7 @@ def knapsack_cached(rows, knapsack_size, index, cache):
             
         return cache[index-1][knapsack_size]
                     
-file = open(os.path.dirname(os.path.realpath(__file__)) + "/knapsack1.txt")
+file = open(os.path.dirname(os.path.realpath(__file__)) + "/knapsack2.txt")
 
 knapsack_size, number_of_items = map(lambda x: int(x), file.readline().replace("\n", "").split(" "))
 

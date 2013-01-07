@@ -1,5 +1,5 @@
 def file 
-  @file ||= File.readlines(File.dirname(__FILE__) + "/knapsack1.txt").map { |x| x.gsub(/\n/, "") }
+  @file ||= File.readlines(File.dirname(__FILE__) + "/knapsack2.txt").map { |x| x.gsub(/\n/, "") }
 end
 
 header = file.first
