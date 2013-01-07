@@ -2,37 +2,57 @@ import System.IO
 import Data.List.Split
 import Debug.Trace
 import qualified Data.Map as Map
-import Data.Array
+import Data.Array as Array
 import Data.Maybe
+import System.IO.Unsafe
+import Data.IORef
+    
+data Cache i = Cache {
+    cachedItems :: IORef (Map.Map (Int, Int) Int)
+}
+    
+ref :: a -> IORef a
+ref x = unsafePerformIO (newIORef x)    
 
-knapsackCached :: [[Int]] -> Int -> Int -> Array Int (Map.Map Int Int) -> Array Int (Map.Map Int Int)
-knapsackCached rows knapsackSize index cache = 
-    trace (show "top: " ++ show cache) $
-    if index == 0 || knapsackSize == 0 
-        then cache
+emptyMap = Cache (ref (Map.empty :: Map.Map (Int, Int) Int))
+             
+-- if Map.lookup (weight, value) items == Nothing 
+--         then 
+--            
+--            return 1 
+--     else 
+--         return fromJust $ Map.lookup (weight, value) items
+-- maybe (return 1) (writeIORef (cachedItems cache) (cachedItems cache))
+-- return 2
+    -- if Map.lookup (weight, value) items == Nothing 
+    --     then 
+    --                         -- (return result) $ modifyIORef (cachedItems cache) (\l -> (Map.insert (weight, value) result items)) 
+    --         writeIORef (cachedItems cache) (cachedItems cache)
+    --         return $ 0
+    --         -- where result = fn weight value 
+    -- else
+    --     fromJust $ Map.lookup (weight, value) items)             
+        
+memoize :: (Int -> Int -> Int) -> Int -> Int -> Int                  
+memoize fn numberOfItems weight = unsafePerformIO $ do 
+    let cache = emptyMap
+    items <- readIORef (cachedItems cache)
+    if Map.lookup (numberOfItems, weight) items == Nothing then do
+        let result = fn numberOfItems weight
+        (writeIORef (cachedItems cache) (Map.insert (numberOfItems, weight) result items))
+        return result
     else
-         let (value:weight:_) = rows !! index in
-         if weight > knapsackSize && Map.lookup knapsackSize (cache ! (index-1)) == Nothing
-             then                 
-                 let newCache = knapsackCached rows knapsackSize (index-1) cache
-                     newValue = fromJust $ Map.lookup (knapsackSize) (newCache ! (index-1))
-                     updatedCache = newCache // [(index-1, Map.insert knapsackSize newValue (newCache ! (index-1)))] in
-                 trace (show "updatedcache" ++ show newCache) $ updatedCache
-         else
-             if Map.lookup knapsackSize (cache ! (index-1)) == Nothing
-                 then 
-                     let newCache1 = knapsackCached rows knapsackSize (index-1) cache
-                         newCache2 = knapsackCached rows (knapsackSize-weight) (index-1) cache
-                         newValue1 = fromJust $ Map.lookup (knapsackSize) (newCache1 ! (index-1))
-                         newValue2 = value + (fromJust $ Map.lookup (knapsackSize-weight) (newCache2 ! (index-1)))
-                         updatedCache = if newValue1 > newValue2 
-                                        then newCache1 // [((index-1), Map.insert knapsackSize newValue1 (newCache1 ! (index-1)))] 
-                                        else newCache2 // [((index-1), Map.insert knapsackSize newValue2 (newCache2 ! (index-1)))] in
-                     trace (show "updatedcache" ++ show updatedCache) $ updatedCache
-             else
-                 trace (show "no cache update: " ++ show cache) $
-                 -- fromJust $ Map.lookup knapsackSize (cache ! (index - 1))
-                 cache
+        return (fromJust $ Map.lookup (numberOfItems, weight) items)
+        
+knapsackCached :: [[Int]] -> Int -> Int -> Int
+knapsackCached rows weight numberOfItems = 
+    inner (numberOfItems-1) weight
+    where inner = memoize (\i w -> if i < 0 || w == 0 then 0
+                                 else
+                                     let best = inner (i-1) w 
+                                         (vi:wi:_) = rows !! i in 
+                                     if wi > w then best
+                                     else maximum [best, vi + inner (i-1) (w-wi)])
         
 process :: String -> (Int, Int, [[Int]])
 process fileContents = (knapsackSize, numberOfItems, rows)
@@ -42,8 +62,6 @@ process fileContents = (knapsackSize, numberOfItems, rows)
                              extractHeader header = map read $ (splitOn " " header)
 
 main = do 
-    contents <- readFile "knapsack_small.txt"
-    let (knapsackSize, numberOfItems, rows) = process contents
-        cache = array (0, knapsackSize) [(x,Map.empty) | x<-[0..knapsackSize]]
-        result  = knapsackCached rows knapsackSize (numberOfItems-1) cache
-    putStrLn $ show $ result
+    contents <- readFile "knapsack2.txt"
+    let (knapsackSize, numberOfItems, rows) = process contents        
+    putStrLn $ show $ knapsackCached rows knapsackSize numberOfItems
