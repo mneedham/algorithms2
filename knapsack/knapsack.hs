@@ -35,11 +35,11 @@ data Cache i = Cache {
         
 memoize :: (Int -> Int -> Int) -> Int -> Int -> Int                  
 memoize fn numberOfItems weight = unsafePerformIO $ do 
-    let cache = Cache (ref (Map.empty :: Map.Map (Int, Int) Int))
-    items <- readIORef (cachedItems cache)
+    let cache = ref (Map.empty :: Map.Map (Int, Int) Int)
+    items <- readIORef cache
     if Map.lookup (numberOfItems, weight) items == Nothing then do
         let result = fn numberOfItems weight
-        writeIORef (cachedItems cache) $  Map.insert (numberOfItems, weight) result items
+        writeIORef cache $  Map.insert (numberOfItems, weight) result items
         return result
     else
         return (fromJust $ Map.lookup (numberOfItems, weight) items)
