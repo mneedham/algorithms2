@@ -7,14 +7,9 @@ import Data.Maybe
 import System.IO.Unsafe
 import Data.IORef
     
-data Cache i = Cache {
-    cachedItems :: IORef (Map.Map (Int, Int) Int)
-}
-    
+ 
 ref :: a -> IORef a
 ref x = unsafePerformIO (newIORef x)    
-
-emptyMap = Cache (ref (Map.empty :: Map.Map (Int, Int) Int))
              
 -- if Map.lookup (weight, value) items == Nothing 
 --         then 
@@ -33,13 +28,18 @@ emptyMap = Cache (ref (Map.empty :: Map.Map (Int, Int) Int))
     -- else
     --     fromJust $ Map.lookup (weight, value) items)             
         
+data Cache i = Cache {
+    cachedItems :: IORef (Map.Map (Int, Int) Int)
+}
+        
+        
 memoize :: (Int -> Int -> Int) -> Int -> Int -> Int                  
 memoize fn numberOfItems weight = unsafePerformIO $ do 
-    let cache = emptyMap
+    let cache = Cache (ref (Map.empty :: Map.Map (Int, Int) Int))
     items <- readIORef (cachedItems cache)
     if Map.lookup (numberOfItems, weight) items == Nothing then do
         let result = fn numberOfItems weight
-        (writeIORef (cachedItems cache) (Map.insert (numberOfItems, weight) result items))
+        writeIORef (cachedItems cache) $  Map.insert (numberOfItems, weight) result items
         return result
     else
         return (fromJust $ Map.lookup (numberOfItems, weight) items)
@@ -48,7 +48,7 @@ knapsackCached :: [[Int]] -> Int -> Int -> Int
 knapsackCached rows weight numberOfItems = 
     inner (numberOfItems-1) weight
     where inner = memoize (\i w -> if i < 0 || w == 0 then 0
-                                 else
+                                   else
                                      let best = inner (i-1) w 
                                          (vi:wi:_) = rows !! i in 
                                      if wi > w then best
