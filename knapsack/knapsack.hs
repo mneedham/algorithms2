@@ -21,8 +21,7 @@ foo = do
  
 ref :: a -> IORef a
 ref x = unsafePerformIO (newIORef x)    
-             
-                 
+                              
 data Cache i = Cache {
     cachedItems :: IORef (Map.Map (Int, Int) Int)
 }
@@ -47,7 +46,31 @@ knapsackCached rows weight numberOfItems =
                                          (vi:wi:_) = rows !! i in 
                                      if wi > w then best
                                      else maximum [best, vi + inner (i-1) (w-wi)])
-        
+
+knapsackCached1 :: [[Int]] -> Int -> Int -> IORef (Map.Map (Int, Int) Int) -> Int
+knapsackCached1 rows knapsackWeight index cacheContainer = unsafePerformIO $ do
+    cache <- readIORef cacheContainer
+    if index == 0 || knapsackWeight == 0 then do
+        return 0
+    else
+       let (value:weight:_) = rows !! index
+           best = knapsackCached1 rows knapsackWeight prevIndex cacheContainer  in
+       if weight > knapsackWeight && lookupPreviousIn cache == Nothing
+           then do
+               let updatedCache =  Map.insert (prevIndex, knapsackWeight) best cache
+               writeIORef cacheContainer updatedCache
+               return $ fromJust $ lookupPreviousIn updatedCache
+       else
+           if lookupPreviousIn cache == Nothing then do
+                   let newBest = maximum [best, value + knapsackCached1 rows (knapsackWeight-weight) prevIndex cacheContainer]
+                       updatedCache = Map.insert (prevIndex, knapsackWeight) newBest cache
+                   writeIORef cacheContainer updatedCache
+                   return $ fromJust $ lookupPreviousIn updatedCache
+           else
+               return $ fromJust $ lookupPreviousIn cache
+    where lookupPreviousIn cache = Map.lookup (prevIndex,knapsackWeight) cache
+          prevIndex = index-1
+
 process :: String -> (Int, Int, [[Int]])
 process fileContents = (knapsackSize, numberOfItems, rows)
                        where (knapsackSize:numberOfItems:_) = extractHeader $ processedFileContents !! 0
@@ -58,5 +81,7 @@ process fileContents = (knapsackSize, numberOfItems, rows)
 main = do 
     args <- getArgs
     contents <- readFile (args !! 0)
-    let (knapsackSize, numberOfItems, rows) = process contents        
-    putStrLn $ show $ knapsackCached rows knapsackSize numberOfItems
+    let (knapsackSize, numberOfItems, rows) = process contents
+        cache = ref (Map.empty :: Map.Map (Int, Int) Int)
+    putStrLn $ show $ knapsackCached1 rows knapsackSize (numberOfItems-1) cache
+    -- putStrLn $ show $ knapsackCached rows knapsackSize numberOfItems
