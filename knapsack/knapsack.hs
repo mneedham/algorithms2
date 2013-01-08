@@ -6,33 +6,27 @@ import Data.Array as Array
 import Data.Maybe
 import System.IO.Unsafe
 import Data.IORef
+import System.Environment
+
+import qualified Data.HashTable.IO as H
+
+type HashTable k v = H.BasicHashTable k v
+
+foo :: IO (HashTable Int Int)
+foo = do
+    ht <- H.new
+    H.insert ht 1 1
+    return ht
     
  
 ref :: a -> IORef a
 ref x = unsafePerformIO (newIORef x)    
              
--- if Map.lookup (weight, value) items == Nothing 
---         then 
---            
---            return 1 
---     else 
---         return fromJust $ Map.lookup (weight, value) items
--- maybe (return 1) (writeIORef (cachedItems cache) (cachedItems cache))
--- return 2
-    -- if Map.lookup (weight, value) items == Nothing 
-    --     then 
-    --                         -- (return result) $ modifyIORef (cachedItems cache) (\l -> (Map.insert (weight, value) result items)) 
-    --         writeIORef (cachedItems cache) (cachedItems cache)
-    --         return $ 0
-    --         -- where result = fn weight value 
-    -- else
-    --     fromJust $ Map.lookup (weight, value) items)             
-        
+                 
 data Cache i = Cache {
     cachedItems :: IORef (Map.Map (Int, Int) Int)
 }
-        
-        
+                
 memoize :: (Int -> Int -> Int) -> Int -> Int -> Int                  
 memoize fn numberOfItems weight = unsafePerformIO $ do 
     let cache = ref (Map.empty :: Map.Map (Int, Int) Int)
@@ -62,6 +56,7 @@ process fileContents = (knapsackSize, numberOfItems, rows)
                              extractHeader header = map read $ (splitOn " " header)
 
 main = do 
-    contents <- readFile "knapsack2.txt"
+    args <- getArgs
+    contents <- readFile (args !! 0)
     let (knapsackSize, numberOfItems, rows) = process contents        
     putStrLn $ show $ knapsackCached rows knapsackSize numberOfItems
