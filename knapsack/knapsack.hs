@@ -26,26 +26,26 @@ data Cache i = Cache {
     cachedItems :: IORef (Map.Map (Int, Int) Int)
 }
                 
-memoize :: (Int -> Int -> Int) -> Int -> Int -> Int                  
-memoize fn numberOfItems weight = unsafePerformIO $ do 
-    let cache = ref (Map.empty :: Map.Map (Int, Int) Int)
-    items <- readIORef cache
-    if Map.lookup (numberOfItems, weight) items == Nothing then do
-        let result = fn numberOfItems weight
-        writeIORef cache $  Map.insert (numberOfItems, weight) result items
-        return result
-    else
-        return (fromJust $ Map.lookup (numberOfItems, weight) items)
+memoize :: ((Int, Int) -> Int) -> (Int, Int) -> Int                  
+memoize fn mapKey = unsafePerformIO $ do 
+  let cache = ref (Map.empty :: Map.Map (Int, Int) Int)
+  items <- readIORef cache
+  if Map.lookup mapKey items == Nothing then do
+    let result = fn mapKey
+    writeIORef cache $  Map.insert mapKey result items
+    return result
+  else
+    return (fromJust $ Map.lookup mapKey items)        
         
 knapsackCached :: [[Int]] -> Int -> Int -> Int
 knapsackCached rows weight numberOfItems = 
-    inner (numberOfItems-1) weight
-    where inner = memoize (\i w -> if i < 0 || w == 0 then 0
+  inner (numberOfItems-1, weight)
+  where inner = memoize (\(i,w) -> if i < 0 || w == 0 then 0
                                    else
-                                     let best = inner (i-1) w 
+                                     let best = inner (i-1,w) 
                                          (vi:wi:_) = rows !! i in 
                                      if wi > w then best
-                                     else maximum [best, vi + inner (i-1) (w-wi)])
+                                     else maximum [best, vi + inner (i-1, w-wi)])
 
 knapsackCached1 :: [[Int]] -> Int -> Int -> IORef (Map.Map (Int, Int) Int) -> Int
 knapsackCached1 rows knapsackWeight index cacheContainer = unsafePerformIO $ do
@@ -83,5 +83,5 @@ main = do
     contents <- readFile (args !! 0)
     let (knapsackSize, numberOfItems, rows) = process contents
         cache = ref (Map.empty :: Map.Map (Int, Int) Int)
-    putStrLn $ show $ knapsackCached1 rows knapsackSize (numberOfItems-1) cache
-    -- putStrLn $ show $ knapsackCached rows knapsackSize numberOfItems
+    -- putStrLn $ show $ knapsackCached1 rows knapsackSize (numberOfItems-1) cache
+    putStrLn $ show $ knapsackCached rows knapsackSize numberOfItems
