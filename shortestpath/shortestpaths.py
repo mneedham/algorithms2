@@ -11,13 +11,10 @@ for line in file.readlines():
 
 n = vertices
 cache = [[0 for k in xrange(vertices)] for j in xrange(edges)]
-# cache = [0 for k in xrange(vertices)]
 
 s=0
 cache[0][s] = 0
-# cache[s] = 0
 for v in range(0, vertices):
-  # cache[v] = float("inf")  
   if v != s:
     cache[0][v] = float("inf")
 
