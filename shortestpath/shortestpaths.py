@@ -1,6 +1,6 @@
 import os
                     
-file = open(os.path.dirname(os.path.realpath(__file__)) + "/g_small.txt")
+file = open(os.path.dirname(os.path.realpath(__file__)) + "/g_medium.txt")
 
 vertices, edges = map(lambda x: int(x), file.readline().replace("\n", "").split(" "))
 
@@ -15,7 +15,7 @@ for line in file.readlines():
 n = vertices
 
 shortest_paths = []
-for s in range(0, vertices):
+for s in range(0, 1):
   # print("processing: " + str(s))
   cache = [[0 for k in xrange(vertices)] for j in xrange(vertices)]
   cache[0][s] = 0
@@ -24,10 +24,9 @@ for s in range(0, vertices):
       cache[0][v] = float("inf")
 
   for i in range(1, vertices):
-    # print("i: " + str(i))
     for v in range(0, vertices):
+      # print("i: " + str(i) + ", v: " + str(v))
       adjacent_nodes = adjacency_list[v]
-      # print("adj: " + str(adjacent_nodes))
 
       lookup_costs = []
       for node in adjacent_nodes:
@@ -41,10 +40,13 @@ for s in range(0, vertices):
     
       # print("updating cache..." + str(v))
       cache[i][v] = min(cache[i-1][v], least_adjacent_cost)
+      if cache[i] == cache[i-1]:
+        break;
   shortest_paths.append([s, cache[vertices-1]])
 
 for path in shortest_paths:
   print(str(path[1]))
 
+# print(shortest_paths)
 shortest_path = min(reduce(lambda x, y: x + y, map(lambda x: x[1], shortest_paths)))  
 print("Shortest Path: " + str(shortest_path))  
