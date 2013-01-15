@@ -1,6 +1,6 @@
 import os
                     
-file = open(os.path.dirname(os.path.realpath(__file__)) + "/g1.txt")
+file = open(os.path.dirname(os.path.realpath(__file__)) + "/g_small.txt")
 
 vertices, edges = map(lambda x: int(x), file.readline().replace("\n", "").split(" "))
 
@@ -22,8 +22,10 @@ for s in range(0, 1):
   for v in range(0, vertices):
     if v != s:
       cache[0][v] = float("inf")
+  # print(cache)    
 
   for i in range(1, vertices):
+    print(cache)
     for v in range(0, vertices):
       # print("i: " + str(i) + ", v: " + str(v))
       adjacent_nodes = adjacency_list[v]
@@ -31,9 +33,9 @@ for s in range(0, 1):
       # adjacent_costs = []
       least_adjacent_cost = float("inf")
       for node in adjacent_nodes:
-        adjacent_value = cache[i-1][node["from"]-1] + node["weight"]
-        if adjacent_value < least_adjacent_cost:
-          least_adjacent_cost = adjacent_value
+        adjacent_cost = cache[i-1][node["from"]-1] + node["weight"]
+        if adjacent_cost < least_adjacent_cost:
+          least_adjacent_cost = adjacent_cost
         # adjacent_costs.append(cache[i-1][node["from"]-1] + node["weight"])
 
       # if adjacent_costs:
@@ -43,8 +45,8 @@ for s in range(0, 1):
       #     
       # print("updating cache..." + str(v))
       cache[i][v] = min(cache[i-1][v], least_adjacent_cost)
-      if cache[i] == cache[i-1]:
-        break;
+      # if cache[i] == cache[i-1]:
+         # break;
   shortest_paths.append([s, cache[vertices-1]])
 
 for path in shortest_paths:
