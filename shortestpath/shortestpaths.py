@@ -1,6 +1,6 @@
 import os
 
-file = open(os.path.dirname(os.path.realpath(__file__)) + "/g1.txt")
+file = open(os.path.dirname(os.path.realpath(__file__)) + "/g_small3.txt")
 
 vertices, edges = map(lambda x: int(x), file.readline().replace("\n", "").split(" "))
 
@@ -13,7 +13,7 @@ for line in file.readlines():
 n = vertices
 
 shortest_paths = []
-s=2
+s=0
 
 cache = [[0 for k in xrange(vertices)] for j in xrange(vertices)]
 cache[0][s] = 0

@@ -28,7 +28,6 @@ shortest_paths = []
 for s in range(0, vertices):
     cache = initialise_cache(vertices, s)
     for i in range(1, vertices):
-        # print("iteration" + str(i) + ": " + str(time() - start_time))
         previous_cache = cache[:]
                 
         combined = (previous_cache.T + adjacency_matrix).min(axis=1)
@@ -50,6 +49,3 @@ for s in range(0, vertices):
     
 all_shortest = reduce(lambda x, y: concatenate((x,y), axis=1), map(lambda x: x[1], shortest_paths))
 print(min(all_shortest))
-
-# shortest_path = min(reduce(lambda x, y: x + y, map(lambda x: x[1], shortest_paths)))
-# print("Shortest Path: " + str(shortest_path))  
