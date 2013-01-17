@@ -1,27 +1,9 @@
 import os
-from copy import *
 from numpy import *
 
-file = open(os.path.dirname(os.path.realpath(__file__)) + "/g_medium.txt")
-
+file = open(os.path.dirname(os.path.realpath(__file__)) + "/g3.txt")
 vertices, edges = map(lambda x: int(x), file.readline().replace("\n", "").split(" "))
-
 rows = []
-
-# adjacency_matrix = [[0 for k in xrange(vertices)] for j in xrange(vertices)]
-# for line in file.readlines():
-#     tail, head, weight = line.split(" ")
-#     adjacency_matrix[int(head)-1][int(tail)-1] = int(weight)    
-
-adjacency_list = [[] for k in xrange(vertices)]
-for line in file.readlines():
-    tail, head, weight = line.split(" ")
-    adjacency_list[int(head)-1].append({"from" : int(tail), "weight" : int(weight)})
-
-n = vertices
-
-shortest_paths = []
-s=0
 
 def initialise_cache(vertices, s):
     cache = empty(vertices)
@@ -29,29 +11,25 @@ def initialise_cache(vertices, s):
     cache[s] = 0
     return cache    
 
-cache = initialise_cache(vertices, s)
+adjacency_matrix = zeros((vertices, vertices))
+adjacency_matrix[:] = float("inf")
+for line in file.readlines():
+    tail, head, weight = line.split(" ")
+    adjacency_matrix[int(head)-1][int(tail)-1] = int(weight)    
 
-for i in range(1, vertices):
-    previous_cache = deepcopy(cache)
+shortest_paths = []
+
+for s in range(0, 1):
     cache = initialise_cache(vertices, s)
-    
-    
-    
-    for v in range(0, vertices):
-        adjacent_nodes = adjacency_list[v]
-    
-        least_adjacent_cost = float("inf")
-        for node in adjacent_nodes:
-            adjacent_cost = previous_cache[node["from"]-1] + node["weight"]
-            if adjacent_cost < least_adjacent_cost:
-                least_adjacent_cost = adjacent_cost
-    
-        cache[v] = min(previous_cache[v], least_adjacent_cost)
+    for i in range(1, vertices):
+        previous_cache = cache
+        combined = (previous_cache.T + adjacency_matrix).min(axis=1)
+        cache = minimum(previous_cache, combined)
 
-shortest_paths.append([s, cache])
+    shortest_paths.append([s, cache])
 
-for path in shortest_paths:
-  print(str(path[1]))
+# for path in shortest_paths:
+#     print(str(path[1]))
 
 shortest_path = min(reduce(lambda x, y: x + y, map(lambda x: x[1], shortest_paths)))
 print("Shortest Path: " + str(shortest_path))  
