@@ -7,7 +7,6 @@ start_time = time()
 
 file = open(os.path.dirname(os.path.realpath(__file__)) + "/" + sys.argv[1:][0])
 vertices, edges = map(lambda x: int(x), file.readline().replace("\n", "").split(" "))
-rows = []
 
 adjacency_matrix = zeros((vertices, vertices))
 adjacency_matrix[:] = float("inf")
