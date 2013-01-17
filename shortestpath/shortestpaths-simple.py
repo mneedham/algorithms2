@@ -1,6 +1,7 @@
 import os
+from copy import *
 
-file = open(os.path.dirname(os.path.realpath(__file__)) + "/g_small.txt")
+file = open(os.path.dirname(os.path.realpath(__file__)) + "/g_medium.txt")
 
 vertices, edges = map(lambda x: int(x), file.readline().replace("\n", "").split(" "))
 
@@ -13,29 +14,34 @@ for line in file.readlines():
 n = vertices
 
 shortest_paths = []
-s=2
+s=0
 
-cache = [[0 for k in xrange(vertices)] for j in xrange(vertices)]
-cache[0][s] = 0
+def initialise_cache(vertices, s):
+    cache = [0 for k in xrange(vertices)]
+    cache[s] = 0
 
-for v in range(0, vertices):
-  if v != s:
-    cache[0][v] = float("inf")
+    for v in range(0, vertices):
+      if v != s:
+        cache[v] = float("inf")
+    return cache    
+
+cache = initialise_cache(vertices, s)
 
 for i in range(1, vertices):
-  print(cache)
-  for v in range(0, vertices):
-    adjacent_nodes = adjacency_list[v]
+    previous_cache = deepcopy(cache)
+    cache = initialise_cache(vertices, s)
+    for v in range(0, vertices):
+        adjacent_nodes = adjacency_list[v]
     
-    least_adjacent_cost = float("inf")
-    for node in adjacent_nodes:
-      adjacent_cost = cache[i-1][node["from"]-1] + node["weight"]
-      if adjacent_cost < least_adjacent_cost:
-        least_adjacent_cost = adjacent_cost
+        least_adjacent_cost = float("inf")
+        for node in adjacent_nodes:
+            adjacent_cost = previous_cache[node["from"]-1] + node["weight"]
+            if adjacent_cost < least_adjacent_cost:
+                least_adjacent_cost = adjacent_cost
     
-    cache[i][v] = min(cache[i-1][v], least_adjacent_cost)
+        cache[v] = min(previous_cache[v], least_adjacent_cost)
 
-shortest_paths.append([s, cache[vertices-1]])
+shortest_paths.append([s, cache])
 
 for path in shortest_paths:
   print(str(path[1]))
