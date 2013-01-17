@@ -1,11 +1,18 @@
 import os
 from copy import *
+from numpy import *
 
 file = open(os.path.dirname(os.path.realpath(__file__)) + "/g_medium.txt")
 
 vertices, edges = map(lambda x: int(x), file.readline().replace("\n", "").split(" "))
 
 rows = []
+
+# adjacency_matrix = [[0 for k in xrange(vertices)] for j in xrange(vertices)]
+# for line in file.readlines():
+#     tail, head, weight = line.split(" ")
+#     adjacency_matrix[int(head)-1][int(tail)-1] = int(weight)    
+
 adjacency_list = [[] for k in xrange(vertices)]
 for line in file.readlines():
     tail, head, weight = line.split(" ")
@@ -17,12 +24,9 @@ shortest_paths = []
 s=0
 
 def initialise_cache(vertices, s):
-    cache = [0 for k in xrange(vertices)]
+    cache = empty(vertices)
+    cache[:] = float("inf")
     cache[s] = 0
-
-    for v in range(0, vertices):
-      if v != s:
-        cache[v] = float("inf")
     return cache    
 
 cache = initialise_cache(vertices, s)
@@ -30,6 +34,9 @@ cache = initialise_cache(vertices, s)
 for i in range(1, vertices):
     previous_cache = deepcopy(cache)
     cache = initialise_cache(vertices, s)
+    
+    
+    
     for v in range(0, vertices):
         adjacent_nodes = adjacency_list[v]
     
