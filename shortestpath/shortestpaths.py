@@ -1,8 +1,17 @@
 import os
-file = open(os.path.dirname(os.path.realpath(__file__)) + "/g_small.txt")
+def calculate_least_adjacent_cost(adjacency_list, i, v, cache):
+    adjacent_nodes = adjacency_list[v]
+    
+    least_adjacent_cost = float("inf")
+    for node in adjacent_nodes:
+      adjacent_cost = cache[node["from"]-1] + node["weight"]
+      if adjacent_cost < least_adjacent_cost:
+        least_adjacent_cost = adjacent_cost
+    return least_adjacent_cost
+
+file = open(os.path.dirname(os.path.realpath(__file__)) + "/g1.txt")
 vertices, edges = map(lambda x: int(x), file.readline().replace("\n", "").split(" "))
 
-rows = []
 adjacency_list = [[] for k in xrange(vertices)]
 for line in file.readlines():
     tail, head, weight = line.split(" ")
@@ -18,26 +27,13 @@ for v in range(0, vertices):
 
 for i in range(1, vertices):
   for v in range(0, vertices):
-    adjacent_nodes = adjacency_list[v]
-    
-    least_adjacent_cost = float("inf")
-    for node in adjacent_nodes:
-      adjacent_cost = cache[i-1][node["from"]-1] + node["weight"]
-      if adjacent_cost < least_adjacent_cost:
-        least_adjacent_cost = adjacent_cost
-    
+
+    least_adjacent_cost = calculate_least_adjacent_cost(adjacency_list, i, v, cache[i-1])
     cache[i][v] = min(cache[i-1][v], least_adjacent_cost)
     
 # detecting negative cycles
 for v in range(0, vertices):
-  adjacent_nodes = adjacency_list[v]
-  
-  least_adjacent_cost = float("inf")
-  for node in adjacent_nodes:
-    adjacent_cost = cache[vertices-1][node["from"]-1] + node["weight"]
-    if adjacent_cost < least_adjacent_cost:
-      least_adjacent_cost = adjacent_cost
-  
+  least_adjacent_cost = calculate_least_adjacent_cost(adjacency_list, i, v, cache[vertices-1])  
   cache[vertices][v] = min(cache[vertices-1][v], least_adjacent_cost)
 
 if(not cache[vertices] == cache[vertices-1]):
