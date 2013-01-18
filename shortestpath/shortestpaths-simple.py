@@ -42,7 +42,7 @@ for s in range(0, vertices):
     
     print("s: " + str(s) + " done " + str(time() - start_time))
     if(not alltrue(cache == previous_cache)):
-        raise Exception("negative cycle bitches")
+        raise Exception("negative cycle detected")
             
     shortest_paths.append([s, cache])
     
