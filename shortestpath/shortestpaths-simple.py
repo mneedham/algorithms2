@@ -14,8 +14,6 @@ for line in file.readlines():
     tail, head, weight = line.split(" ")
     adjacency_matrix[int(head)-1][int(tail)-1] = int(weight)
 
-print("processed file: " + str(time() - start_time))
-
 def initialise_cache(vertices, s):
     cache = empty(vertices)
     cache[:] = float("inf")
