@@ -3,12 +3,10 @@ from numpy import *
 from time import time
 import sys
 from math import *
-
 from itertools import chain, combinations
+
 def all_subsets(ss):
   return chain(*map(lambda x: combinations(ss, x), range(0, len(ss)+1)))
-
-start_time = time()
 
 file = open(os.path.dirname(os.path.realpath(__file__)) + "/" + sys.argv[1:][0])
 number_of_cities = int(file.readline().replace("\n", ""))
