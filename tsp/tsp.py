@@ -1,5 +1,4 @@
 import os
-from numpy import *
 from time import time
 import sys
 from math import *
