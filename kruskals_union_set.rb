@@ -13,7 +13,7 @@ end
 
 # Some renaming of variables of Michael Luckender's class -> https://github.com/mluckeneder/Union-Find-Ruby/blob/master/quick-union.rb
 class UnionFind
-  def initialize(n)
+  def initialize
     @subsets = Hash.new{|subsets, element| subsets[element] = [element]}
   end
 
@@ -29,7 +29,7 @@ class UnionFind
   end
 end
 
-set = UnionFind.new number_of_nodes
+set = UnionFind.new
 
 @minimum_spanning_tree = []
 
