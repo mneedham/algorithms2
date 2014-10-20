@@ -14,18 +14,18 @@ end
 # Some renaming of variables of Michael Luckender's class -> https://github.com/mluckeneder/Union-Find-Ruby/blob/master/quick-union.rb
 class UnionFind
   def initialize(n)
-    @leaders = Hash.new{|subsets, element| subsets[element] = [element]}
+    @subsets = Hash.new{|subsets, element| subsets[element] = [element]}
   end
 
   def connected?(id1,id2)
-    @leaders[id1] == @leaders[id2]
+    @subsets[id1] == @subsets[id2]
   end
 
   def union(id1,id2)
-    leader_1, leader_2 = @leaders[id1], @leaders[id2]
-    leader_1.each do |element, _|
-      @leaders[element] = leader_2 << element
-    end unless leader_1 == leader_2
+    subset_1, subset_2 = @subsets[id1], @subsets[id2]
+    subset_1.each do |element, _|
+      @subsets[element] = subset_2 << element
+    end unless subset_1 == subset_2
   end
 end
 
