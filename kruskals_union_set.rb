@@ -14,7 +14,7 @@ end
 # Some renaming of variables of Michael Luckender's class -> https://github.com/mluckeneder/Union-Find-Ruby/blob/master/quick-union.rb
 class UnionFind
   def initialize(n)
-    @leaders = 1.upto(n).inject([]) { |leaders, i| leaders[i] = i; leaders }
+    @leaders = Hash.new{|subsets, element| subsets[element] = [element]}
   end
 
   def connected?(id1,id2)
@@ -23,7 +23,9 @@ class UnionFind
 
   def union(id1,id2)
     leader_1, leader_2 = @leaders[id1], @leaders[id2]
-    @leaders.map! {|i| (i == leader_1) ? leader_2 : i }
+    leader_1.each do |element, _|
+      @leaders[element] = leader_2 << element
+    end unless leader_1 == leader_2
   end
 end
 
